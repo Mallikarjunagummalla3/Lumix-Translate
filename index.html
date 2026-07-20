@@ -1,0 +1,3142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>LumixTranslate - Premium AI Multilingual Translator</title>
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- Tesseract.js for Client-Side OCR -->
+  <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+  
+  <style>
+    :root {
+      --bg-gradient: linear-gradient(135deg, #070913 0%, #0d1127 50%, #15103c 100%);
+      --card-bg: rgba(13, 17, 39, 0.7);
+      --card-border: rgba(255, 255, 255, 0.08);
+      --card-border-hover: rgba(99, 102, 241, 0.4);
+      --text-main: #f3f4f6;
+      --text-muted: #9ca3af;
+      --accent-primary: #6366f1; /* Indigo */
+      --accent-secondary: #06b6d4; /* Cyan */
+      --accent-tertiary: #ec4899; /* Pink */
+      --glow-color: rgba(99, 102, 241, 0.15);
+      --glow-active: rgba(6, 182, 212, 0.3);
+      --transition-smooth: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    /* Color Theme Palettes */
+    body.theme-sunset {
+      --bg-gradient: linear-gradient(135deg, #18051b 0%, #2a0826 50%, #170d38 100%);
+      --card-bg: rgba(24, 5, 27, 0.75);
+      --accent-primary: #f43f5e;
+      --accent-secondary: #f97316;
+      --accent-tertiary: #a855f7;
+      --glow-color: rgba(244, 63, 94, 0.2);
+      --glow-active: rgba(249, 115, 22, 0.35);
+    }
+    body.theme-emerald {
+      --bg-gradient: linear-gradient(135deg, #021a12 0%, #062e21 50%, #0f172a 100%);
+      --card-bg: rgba(2, 26, 18, 0.75);
+      --accent-primary: #10b981;
+      --accent-secondary: #06b6d4;
+      --accent-tertiary: #f59e0b;
+      --glow-color: rgba(16, 185, 129, 0.2);
+      --glow-active: rgba(6, 182, 212, 0.35);
+    }
+    body.theme-gold {
+      --bg-gradient: linear-gradient(135deg, #120524 0%, #210b38 50%, #0c1a2e 100%);
+      --card-bg: rgba(18, 5, 36, 0.75);
+      --accent-primary: #8b5cf6;
+      --accent-secondary: #eab308;
+      --accent-tertiary: #38bdf8;
+      --glow-color: rgba(139, 92, 246, 0.2);
+      --glow-active: rgba(234, 179, 8, 0.35);
+    }
+    body.theme-crimson {
+      --bg-gradient: linear-gradient(135deg, #1a0307 0%, #290812 50%, #15092b 100%);
+      --card-bg: rgba(26, 3, 7, 0.75);
+      --accent-primary: #ef4444;
+      --accent-secondary: #c084fc;
+      --accent-tertiary: #f97316;
+      --glow-color: rgba(239, 68, 68, 0.2);
+      --glow-active: rgba(192, 132, 252, 0.35);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg-gradient);
+      color: var(--text-main);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      overflow-x: hidden;
+      padding: 20px 10px;
+      transition: background 0.5s ease;
+    }
+
+    /* Theme Picker Buttons */
+    .theme-picker-container {
+      position: absolute;
+      top: 0;
+      right: 0;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(0, 0, 0, 0.3);
+      padding: 6px 12px;
+      border-radius: 20px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      backdrop-filter: blur(10px);
+    }
+    @media (max-width: 768px) {
+      .theme-picker-container {
+        position: relative;
+        margin: 0 auto 15px auto;
+        width: fit-content;
+      }
+    }
+    .theme-dot {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      border: 2px solid transparent;
+      cursor: pointer;
+      transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+    .theme-dot:hover {
+      transform: scale(1.25);
+    }
+    .theme-dot.active {
+      border-color: #fff;
+      box-shadow: 0 0 10px var(--accent-primary);
+    }
+    .theme-dot-lumix { background: linear-gradient(135deg, #6366f1, #06b6d4); }
+    .theme-dot-sunset { background: linear-gradient(135deg, #f43f5e, #f97316); }
+    .theme-dot-emerald { background: linear-gradient(135deg, #10b981, #06b6d4); }
+    .theme-dot-gold { background: linear-gradient(135deg, #8b5cf6, #eab308); }
+    .theme-dot-crimson { background: linear-gradient(135deg, #ef4444, #c084fc); }
+
+    /* Ambient Background Light Blobs */
+    .blob-container {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: -1;
+      overflow: hidden;
+    }
+    .blob {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(80px);
+      opacity: 0.15;
+      animation: float 20s infinite ease-in-out;
+      transition: background 0.5s ease;
+    }
+    .blob-1 {
+      width: 450px;
+      height: 450px;
+      background: var(--accent-primary);
+      top: -10%;
+      right: 10%;
+    }
+    .blob-2 {
+      width: 350px;
+      height: 350px;
+      background: var(--accent-secondary);
+      bottom: 10%;
+      left: -5%;
+      animation-delay: -5s;
+    }
+    .blob-3 {
+      width: 300px;
+      height: 300px;
+      background: var(--accent-tertiary);
+      top: 40%;
+      right: -5%;
+      animation-delay: -10s;
+    }
+
+    /* Scrollbar Styling */
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+    ::-webkit-scrollbar-track {
+      background: rgba(0, 0, 0, 0.1);
+    }
+    ::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.15);
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: var(--accent-primary);
+    }
+
+    /* App Shell Container */
+    .app-shell {
+      width: 100%;
+      max-width: 1100px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      z-index: 1;
+    }
+
+    /* Connection Banner */
+    .connection-banner {
+      background: rgba(239, 68, 68, 0.2);
+      border: 1px solid rgba(239, 68, 68, 0.4);
+      color: #fca5a5;
+      padding: 10px 16px;
+      border-radius: 12px;
+      display: none;
+      align-items: center;
+      gap: 10px;
+      font-size: 0.9rem;
+      backdrop-filter: blur(8px);
+      animation: slideIn 0.3s ease-out;
+    }
+    .connection-banner.active {
+      display: flex;
+    }
+
+    /* Header Styling */
+    header {
+      text-align: center;
+      margin-bottom: 10px;
+      animation: fadeIn 0.8s ease-out;
+    }
+    header h1 {
+      font-family: 'Outfit', sans-serif;
+      font-size: 2.8rem;
+      font-weight: 800;
+      letter-spacing: -1px;
+      background: linear-gradient(135deg, #ffffff 30%, var(--accent-primary) 70%, var(--accent-secondary) 100%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      margin-bottom: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+    }
+    header h1 i {
+      color: var(--accent-secondary);
+      filter: drop-shadow(0 0 10px rgba(6, 182, 212, 0.5));
+    }
+    header p {
+      color: var(--text-muted);
+      font-size: 1.05rem;
+      font-weight: 400;
+    }
+
+    /* Navigation Tabs */
+    .nav-tabs {
+      display: flex;
+      background: rgba(0, 0, 0, 0.25);
+      border-radius: 16px;
+      padding: 6px;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      gap: 4px;
+      justify-content: center;
+      margin-bottom: 5px;
+    }
+    .tab-btn {
+      flex: 1;
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      padding: 12px 16px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      border-radius: 12px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: var(--transition-smooth);
+    }
+    .tab-btn:hover {
+      color: var(--text-main);
+      background: rgba(255, 255, 255, 0.05);
+    }
+    .tab-btn.active {
+      color: #fff;
+      background: linear-gradient(135deg, var(--accent-primary) 0%, #4f46e5 100%);
+      box-shadow: 0 4px 15px rgba(99, 102, 241, 0.35);
+    }
+
+    /* Main Card Layouts */
+    .panel {
+      display: none;
+      animation: fadeIn 0.4s ease-out;
+    }
+    .panel.active {
+      display: block;
+    }
+
+    /* Glassmorphic Panel Container */
+    .glass-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      backdrop-filter: blur(16px);
+      border-radius: 24px;
+      padding: 24px;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
+      transition: border-color 0.3s ease;
+    }
+    .glass-card:hover {
+      border-color: rgba(255, 255, 255, 0.12);
+    }
+
+    /* Translator Grid Layout */
+    .translator-grid {
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      gap: 20px;
+      align-items: stretch;
+    }
+
+    @media (max-width: 850px) {
+      .translator-grid {
+        grid-template-columns: 1fr;
+      }
+      .swap-col {
+        padding: 10px 0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }
+      .swap-btn {
+        transform: rotate(90deg);
+      }
+      .swap-btn:hover {
+        transform: rotate(270deg) scale(1.1) !important;
+      }
+    }
+
+    /* Column Structures */
+    .source-col, .target-col {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    /* Dropdown Selections */
+    .lang-select-wrapper {
+      position: relative;
+      display: flex;
+      align-items: center;
+      background: rgba(0, 0, 0, 0.2);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 12px;
+      padding: 0 14px;
+      transition: var(--transition-smooth);
+    }
+    .lang-select-wrapper:focus-within {
+      border-color: var(--accent-primary);
+      box-shadow: 0 0 10px rgba(99, 102, 241, 0.2);
+    }
+    .lang-select-wrapper i {
+      color: var(--text-muted);
+      font-size: 1.1rem;
+    }
+    .lang-select {
+      width: 100%;
+      background: transparent;
+      border: none;
+      color: #fff;
+      padding: 14px 10px;
+      font-size: 1rem;
+      font-weight: 500;
+      outline: none;
+      cursor: pointer;
+      appearance: none;
+      -webkit-appearance: none;
+    }
+    .lang-select option {
+      background: #0d1127;
+      color: #fff;
+    }
+
+    /* Text Area Boxes */
+    .textarea-container {
+      position: relative;
+      background: rgba(0, 0, 0, 0.15);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 16px;
+      overflow: hidden;
+      transition: var(--transition-smooth);
+      display: flex;
+      flex-direction: column;
+    }
+    .textarea-container:focus-within {
+      border-color: var(--accent-primary);
+      box-shadow: 0 0 15px var(--glow-color);
+      background: rgba(0, 0, 0, 0.25);
+    }
+    .translation-textarea {
+      width: 100%;
+      min-height: 200px;
+      background: transparent;
+      border: none;
+      outline: none;
+      color: var(--text-main);
+      padding: 16px;
+      font-size: 1.1rem;
+      line-height: 1.6;
+      resize: vertical;
+      font-family: inherit;
+    }
+    .translation-textarea::placeholder {
+      color: rgba(255, 255, 255, 0.3);
+    }
+
+    /* Text Box Footer Controls */
+    .textarea-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 16px;
+      background: rgba(0, 0, 0, 0.1);
+      border-top: 1px solid rgba(255, 255, 255, 0.04);
+    }
+    .char-count {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+    .action-icons {
+      display: flex;
+      gap: 12px;
+    }
+    .action-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      font-size: 1.05rem;
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: var(--transition-smooth);
+    }
+    .action-btn:hover {
+      color: #fff;
+      background: rgba(255, 255, 255, 0.08);
+    }
+    .action-btn.active {
+      color: var(--accent-secondary);
+      background: rgba(6, 182, 212, 0.15);
+      animation: pulse 1.5s infinite;
+    }
+
+    /* Swap Column Styles */
+    .swap-col {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .swap-btn {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: var(--text-main);
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2rem;
+      transition: var(--transition-smooth);
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    }
+    .swap-btn:hover {
+      background: var(--accent-primary);
+      border-color: var(--accent-primary);
+      transform: rotate(180deg) scale(1.1);
+      box-shadow: 0 0 15px rgba(99, 102, 241, 0.5);
+    }
+
+    /* Main Submit Button Area */
+    .main-translate-btn-container {
+      margin-top: 15px;
+      display: flex;
+      justify-content: center;
+    }
+    .main-translate-btn {
+      background: linear-gradient(135deg, var(--accent-primary) 0%, #4f46e5 100%);
+      color: #fff;
+      border: none;
+      padding: 14px 45px;
+      font-size: 1.1rem;
+      font-weight: 700;
+      border-radius: 14px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      transition: var(--transition-smooth);
+      box-shadow: 0 8px 25px rgba(99, 102, 241, 0.4);
+    }
+    .main-translate-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 30px rgba(99, 102, 241, 0.55);
+    }
+    .main-translate-btn:active {
+      transform: translateY(1px);
+    }
+
+    /* Conversation Mode Styles */
+    .convo-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+    }
+    @media (max-width: 768px) {
+      .convo-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+    .convo-card {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      padding: 20px;
+      background: rgba(255, 255, 255, 0.02);
+      border-radius: 18px;
+      border: 1px solid rgba(255, 255, 255, 0.04);
+    }
+    .convo-card-title {
+      font-size: 1.1rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .convo-card-left .convo-card-title { color: var(--accent-secondary); }
+    .convo-card-right .convo-card-title { color: var(--accent-tertiary); }
+    
+    .convo-history {
+      flex-grow: 1;
+      height: 250px;
+      overflow-y: auto;
+      background: rgba(0, 0, 0, 0.2);
+      border-radius: 12px;
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .convo-bubble {
+      max-width: 85%;
+      padding: 10px 14px;
+      border-radius: 16px;
+      font-size: 0.95rem;
+      line-height: 1.4;
+      animation: bubbleUp 0.3s ease-out;
+    }
+    .convo-bubble.sent {
+      background: rgba(6, 182, 212, 0.15);
+      border: 1px solid rgba(6, 182, 212, 0.25);
+      align-self: flex-start;
+      color: #e0f2fe;
+    }
+    .convo-bubble.received {
+      background: rgba(236, 72, 153, 0.15);
+      border: 1px solid rgba(236, 72, 153, 0.25);
+      align-self: flex-end;
+      color: #fce7f3;
+    }
+    .convo-speak-btn {
+      width: 100%;
+      border: none;
+      padding: 14px;
+      border-radius: 14px;
+      font-size: 1rem;
+      font-weight: 700;
+      color: white;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      transition: var(--transition-smooth);
+    }
+    .convo-card-left .convo-speak-btn {
+      background: linear-gradient(135deg, #0891b2 0%, #06b6d4 100%);
+      box-shadow: 0 4px 15px rgba(6, 182, 212, 0.3);
+    }
+    .convo-card-left .convo-speak-btn:hover {
+      box-shadow: 0 6px 20px rgba(6, 182, 212, 0.45);
+      transform: translateY(-2px);
+    }
+    .convo-card-right .convo-speak-btn {
+      background: linear-gradient(135deg, #db2777 0%, #ec4899 100%);
+      box-shadow: 0 4px 15px rgba(236, 72, 153, 0.3);
+    }
+    .convo-card-right .convo-speak-btn:hover {
+      box-shadow: 0 6px 20px rgba(236, 72, 153, 0.45);
+      transform: translateY(-2px);
+    }
+    .convo-speak-btn:active {
+      transform: translateY(0);
+    }
+    .convo-speak-btn.recording {
+      animation: recordingPulse 1.2s infinite;
+      filter: saturate(1.5);
+    }
+
+    /* OCR Image Scan Panel Styles */
+    .ocr-container {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+    }
+    @media (max-width: 768px) {
+      .ocr-container {
+        grid-template-columns: 1fr;
+      }
+    }
+    .ocr-upload-box {
+      border: 2px dashed rgba(255, 255, 255, 0.15);
+      border-radius: 18px;
+      padding: 30px;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+      background: rgba(0, 0, 0, 0.15);
+      cursor: pointer;
+      min-height: 250px;
+      transition: var(--transition-smooth);
+      position: relative;
+      overflow: hidden;
+    }
+    .ocr-upload-box:hover {
+      border-color: var(--accent-primary);
+      background: rgba(99, 102, 241, 0.05);
+    }
+    .ocr-upload-box i {
+      font-size: 2.8rem;
+      color: var(--text-muted);
+      transition: var(--transition-smooth);
+    }
+    .ocr-upload-box:hover i {
+      color: var(--accent-primary);
+      transform: translateY(-5px);
+    }
+    .ocr-file-input {
+      display: none;
+    }
+    
+    /* OCR Scanning Laser Line */
+    .ocr-preview-container {
+      position: relative;
+      width: 100%;
+      max-height: 280px;
+      overflow: hidden;
+      border-radius: 12px;
+      display: none;
+    }
+    .ocr-preview-container img {
+      width: 100%;
+      height: auto;
+      display: block;
+    }
+    .laser-line {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 4px;
+      background: linear-gradient(90deg, transparent, var(--accent-secondary), transparent);
+      box-shadow: 0 0 12px var(--accent-secondary);
+      opacity: 0;
+      pointer-events: none;
+    }
+    .ocr-preview-container.scanning .laser-line {
+      animation: laserSweep 2s infinite ease-in-out;
+      opacity: 1;
+    }
+    
+    /* Live Webcam Section */
+    .webcam-container {
+      position: relative;
+      width: 100%;
+      border-radius: 12px;
+      overflow: hidden;
+      background: #000;
+      display: none;
+    }
+    .webcam-video {
+      width: 100%;
+      height: auto;
+      display: block;
+    }
+    
+    .ocr-controls {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+      margin-top: 10px;
+      flex-wrap: wrap;
+    }
+    .ocr-btn {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: #fff;
+      padding: 10px 18px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      border-radius: 10px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: var(--transition-smooth);
+    }
+    .ocr-btn:hover {
+      background: rgba(255, 255, 255, 0.1);
+      border-color: rgba(255, 255, 255, 0.2);
+    }
+    .ocr-btn.primary {
+      background: linear-gradient(135deg, var(--accent-secondary) 0%, #0891b2 100%);
+      border: none;
+      box-shadow: 0 4px 15px rgba(6, 182, 212, 0.3);
+    }
+    .ocr-btn.primary:hover {
+      box-shadow: 0 6px 20px rgba(6, 182, 212, 0.45);
+      transform: translateY(-1px);
+    }
+    
+    /* OCR Progress bar */
+    .ocr-progress-container {
+      display: none;
+      width: 100%;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 10px;
+      height: 8px;
+      overflow: hidden;
+      margin-top: 15px;
+    }
+    .ocr-progress-bar {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, var(--accent-secondary), var(--accent-primary));
+      transition: width 0.15s ease-out;
+    }
+    .ocr-status-text {
+      font-size: 0.85rem;
+      color: var(--accent-secondary);
+      margin-top: 6px;
+      text-align: center;
+      display: none;
+    }
+
+    /* Saved & History Tab Layout */
+    .archive-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+    }
+    @media (max-width: 768px) {
+      .archive-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+    .archive-col {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+    .archive-title {
+      font-size: 1.2rem;
+      font-weight: 700;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      color: #fff;
+    }
+    .archive-title button {
+      background: transparent;
+      border: none;
+      color: var(--accent-tertiary);
+      font-size: 0.85rem;
+      cursor: pointer;
+      font-weight: 600;
+    }
+    .archive-title button:hover {
+      text-decoration: underline;
+    }
+    .archive-list {
+      background: rgba(0, 0, 0, 0.2);
+      border-radius: 16px;
+      padding: 16px;
+      max-height: 400px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .archive-item {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      border-radius: 12px;
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      position: relative;
+      animation: bubbleUp 0.3s ease-out;
+    }
+    .archive-item:hover {
+      background: rgba(255, 255, 255, 0.05);
+      border-color: rgba(255, 255, 255, 0.08);
+    }
+    .archive-item-langs {
+      font-size: 0.75rem;
+      color: var(--accent-secondary);
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    .archive-item-text {
+      font-size: 0.95rem;
+      line-height: 1.4;
+      white-space: pre-wrap;
+    }
+    .archive-item-translated {
+      font-size: 0.95rem;
+      color: #a5b4fc;
+      line-height: 1.4;
+      border-top: 1px dashed rgba(255, 255, 255, 0.06);
+      padding-top: 8px;
+      white-space: pre-wrap;
+    }
+    .archive-item-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      margin-top: 4px;
+    }
+    .archive-item-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      font-size: 0.9rem;
+      transition: var(--transition-smooth);
+    }
+    .archive-item-btn:hover {
+      color: #fff;
+    }
+    .archive-item-btn.delete:hover {
+      color: var(--accent-tertiary);
+    }
+    .archive-empty {
+      color: var(--text-muted);
+      text-align: center;
+      padding: 30px 10px;
+      font-style: italic;
+      font-size: 0.95rem;
+    }
+
+    /* TTS Speech Configuration Panel */
+    .settings-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+    @media (max-width: 768px) {
+      .settings-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+    .setting-group {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .setting-group label {
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--text-muted);
+    }
+    .range-slider-wrapper {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: rgba(0, 0, 0, 0.15);
+      padding: 10px 14px;
+      border-radius: 12px;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+    .range-slider {
+      flex-grow: 1;
+      accent-color: var(--accent-primary);
+      cursor: pointer;
+    }
+    .slider-val {
+      font-family: monospace;
+      font-size: 0.9rem;
+      color: var(--accent-secondary);
+      font-weight: 700;
+      min-width: 30px;
+      text-align: right;
+    }
+
+    /* Speech Waveform Canvas overlay */
+    .waveform-overlay {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: rgba(7, 9, 19, 0.9);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 20px;
+      padding: 12px 18px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+      backdrop-filter: blur(10px);
+      z-index: 999;
+      display: none;
+      align-items: center;
+      gap: 15px;
+      animation: slideInUp 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+    .waveform-overlay.active {
+      display: flex;
+    }
+    .waveform-canvas {
+      width: 150px;
+      height: 40px;
+      display: block;
+    }
+    .waveform-text {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--accent-secondary);
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .waveform-text i {
+      animation: spin 1s linear infinite;
+    }
+
+    /* Notifications */
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      left: 24px;
+      background: rgba(16, 185, 129, 0.2);
+      border: 1px solid rgba(16, 185, 129, 0.4);
+      color: #a7f3d0;
+      padding: 12px 20px;
+      border-radius: 12px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      backdrop-filter: blur(8px);
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+      display: none;
+      align-items: center;
+      gap: 10px;
+      z-index: 1000;
+      animation: slideInUp 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+    .toast.active {
+      display: flex;
+    }
+
+    /* Animations Keyframes */
+    @keyframes float {
+      0%, 100% { transform: translateY(0px) scale(1); }
+      50% { transform: translateY(-30px) scale(1.05); }
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes slideIn {
+      from { transform: translateY(-20px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+    @keyframes slideInUp {
+      from { transform: translateY(30px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+    @keyframes pulse {
+      0% { box-shadow: 0 0 0 0 rgba(6, 182, 212, 0.4); }
+      70% { box-shadow: 0 0 0 10px rgba(6, 182, 212, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(6, 182, 212, 0); }
+    }
+    @keyframes recordingPulse {
+      0% { box-shadow: 0 0 0 0 rgba(236, 72, 153, 0.4); transform: scale(1); }
+      50% { transform: scale(0.98); }
+      70% { box-shadow: 0 0 0 12px rgba(236, 72, 153, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(236, 72, 153, 0); transform: scale(1); }
+    }
+    @keyframes bubbleUp {
+      from { opacity: 0; transform: translateY(12px) scale(0.98); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+    @keyframes laserSweep {
+      0%, 100% { top: 0%; }
+      50% { top: calc(100% - 4px); }
+    }
+    @keyframes spin {
+      100% { transform: rotate(360deg); }
+    }
+
+    /* Footer Credits */
+    footer {
+      margin-top: 30px;
+      margin-bottom: 20px;
+      text-align: center;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      width: 100%;
+      border-top: 1px solid rgba(255, 255, 255, 0.05);
+      padding-top: 16px;
+    }
+    footer a {
+      color: var(--accent-secondary);
+      text-decoration: none;
+      font-weight: 600;
+    }
+    footer a:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Floating Ambient Blobs -->
+  <div class="blob-container">
+    <div class="blob blob-1"></div>
+    <div class="blob blob-2"></div>
+    <div class="blob blob-3"></div>
+  </div>
+
+  <div class="app-shell">
+    
+    <!-- Connection Offline Banner -->
+    <div id="connectionBanner" class="connection-banner">
+      <i class="fa-solid fa-triangle-exclamation"></i>
+      <span>Network connection lost. Running in Offline Mode with local cache translation.</span>
+    </div>
+
+    <!-- Header -->
+    <header style="position: relative;">
+      <div class="theme-picker-container">
+        <span style="font-size: 0.8rem; color: var(--text-muted); font-weight: 600;"><i class="fa-solid fa-palette"></i> Palette:</span>
+        <button class="theme-dot theme-dot-lumix active" title="Cosmic Lumix (Indigo/Cyan)" onclick="setAppTheme('theme-lumix')"></button>
+        <button class="theme-dot theme-dot-sunset" title="Sunset Aurora (Rose/Coral)" onclick="setAppTheme('theme-sunset')"></button>
+        <button class="theme-dot theme-dot-emerald" title="Cyber Emerald (Teal/Lime)" onclick="setAppTheme('theme-emerald')"></button>
+        <button class="theme-dot theme-dot-gold" title="Royal Amethyst & Gold" onclick="setAppTheme('theme-gold')"></button>
+        <button class="theme-dot theme-dot-crimson" title="Midnight Crimson" onclick="setAppTheme('theme-crimson')"></button>
+      </div>
+
+      <h1><i class="fa-solid fa-circle-nodes"></i> LumixTranslate</h1>
+      <p>Seamless translation with dynamic visual waves, voice integration, and image intelligence.</p>
+    </header>
+
+    <!-- Navigation Tabs -->
+    <nav class="nav-tabs">
+      <button class="tab-btn active" onclick="switchTab(event, 'textPanel')">
+        <i class="fa-solid fa-keyboard"></i> Text
+      </button>
+      <button class="tab-btn" onclick="switchTab(event, 'convoPanel')">
+        <i class="fa-solid fa-comments"></i> Conversation
+      </button>
+      <button class="tab-btn" onclick="switchTab(event, 'ocrPanel')">
+        <i class="fa-solid fa-expand"></i> Scan Image
+      </button>
+      <button class="tab-btn" onclick="switchTab(event, 'chatPanel')">
+        <i class="fa-solid fa-robot"></i> AI Chatbot
+      </button>
+      <button class="tab-btn" onclick="switchTab(event, 'archivePanel')">
+        <i class="fa-solid fa-bookmark"></i> Saved & Logs
+      </button>
+      <button class="tab-btn" onclick="switchTab(event, 'settingsPanel')">
+        <i class="fa-solid fa-sliders"></i> Voice Settings
+      </button>
+    </nav>
+
+    <!-- TAB PANEL 1: TEXT TRANSLATION -->
+    <div id="textPanel" class="panel active">
+      <div class="glass-card">
+        <div class="translator-grid">
+          
+          <!-- Source Column -->
+          <div class="source-col">
+            <div class="lang-select-wrapper">
+              <i class="fa-solid fa-globe"></i>
+              <select id="srcLangSelect" class="lang-select" onchange="onSourceLangChange()">
+                <!-- Populated dynamically -->
+              </select>
+            </div>
+            
+            <div class="textarea-container">
+              <textarea id="srcTextArea" class="translation-textarea" placeholder="Enter text to translate..." oninput="debounceTranslate()"></textarea>
+              <div class="textarea-footer">
+                <span id="srcCharCount" class="char-count">0 / 5000</span>
+                <div class="action-icons">
+                  <button class="action-btn" title="Clear text" onclick="clearSrcText()">
+                    <i class="fa-solid fa-xmark"></i>
+                  </button>
+                  <button id="srcMicBtn" class="action-btn" title="Voice dictation" onclick="toggleVoiceInput('srcTextArea', 'srcMicBtn', 'srcLangSelect')">
+                    <i class="fa-solid fa-microphone"></i>
+                  </button>
+                  <button class="action-btn" title="Listen input text" onclick="speakTextFromArea('srcTextArea', 'srcLangSelect')">
+                    <i class="fa-solid fa-volume-high"></i>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Swap Column -->
+          <div class="swap-col">
+            <button class="swap-btn" title="Swap languages" onclick="swapLanguages()">
+              <i class="fa-solid fa-right-left"></i>
+            </button>
+          </div>
+
+          <!-- Target Column -->
+          <div class="target-col">
+            <div class="lang-select-wrapper">
+              <i class="fa-solid fa-language"></i>
+              <select id="tgtLangSelect" class="lang-select" onchange="triggerTranslation()">
+                <!-- Populated dynamically -->
+              </select>
+            </div>
+
+            <div class="textarea-container">
+              <textarea id="tgtTextArea" class="translation-textarea" placeholder="Translation appears here..." readonly></textarea>
+              <div class="textarea-footer">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                  <span id="tgtCharCount" class="char-count">0</span>
+                  <span id="translationEngineBadge" style="font-size: 0.7rem; padding: 2px 8px; border-radius: 20px; font-weight: 600; opacity: 0; transition: opacity 0.3s ease;">Instant</span>
+                </div>
+                <div class="action-icons">
+                  <button id="starBtn" class="action-btn" title="Save translation" onclick="toggleSaveTranslation()">
+                    <i class="fa-regular fa-star"></i>
+                  </button>
+                  <button class="action-btn" title="Copy to clipboard" onclick="copyToClipboard('tgtTextArea')">
+                    <i class="fa-solid fa-copy"></i>
+                  </button>
+                  <button class="action-btn" title="Read translation out loud" onclick="speakTextFromArea('tgtTextArea', 'tgtLangSelect')">
+                    <i class="fa-solid fa-volume-high"></i>
+                  </button>
+                  <button class="action-btn" title="Share translation" onclick="shareTranslation()">
+                    <i class="fa-solid fa-share-nodes"></i>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <div class="main-translate-btn-container">
+          <button class="main-translate-btn" onclick="triggerTranslation()">
+            <i class="fa-solid fa-play"></i> Translate
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB PANEL 2: CONVERSATION MODE -->
+    <div id="convoPanel" class="panel">
+      <div class="glass-card">
+        <div class="convo-grid">
+          
+          <!-- Left Person A Card -->
+          <div class="convo-card convo-card-left">
+            <div class="convo-card-title">
+              <i class="fa-solid fa-user"></i> Person A
+            </div>
+            
+            <div class="lang-select-wrapper">
+              <i class="fa-solid fa-globe"></i>
+              <select id="convoLangA" class="lang-select">
+                <!-- Populated dynamically -->
+              </select>
+            </div>
+
+            <div id="convoHistoryA" class="convo-history">
+              <!-- Chronological list of translations sent to or from Person A -->
+              <div class="convo-bubble sent">Person A messages and translations will show here.</div>
+            </div>
+
+            <button id="convoMicBtnA" class="convo-speak-btn" onclick="startConvoListening('A')">
+              <i class="fa-solid fa-microphone"></i> Tap & Speak (Person A)
+            </button>
+          </div>
+
+          <!-- Right Person B Card -->
+          <div class="convo-card convo-card-right">
+            <div class="convo-card-title">
+              <i class="fa-solid fa-user"></i> Person B
+            </div>
+
+            <div class="lang-select-wrapper">
+              <i class="fa-solid fa-globe"></i>
+              <select id="convoLangB" class="lang-select">
+                <!-- Populated dynamically -->
+              </select>
+            </div>
+
+            <div id="convoHistoryB" class="convo-history">
+              <!-- Chronological list of translations sent to or from Person B -->
+              <div class="convo-bubble received">Person B messages and translations will show here.</div>
+            </div>
+
+            <button id="convoMicBtnB" class="convo-speak-btn" onclick="startConvoListening('B')">
+              <i class="fa-solid fa-microphone"></i> Tap & Speak (Person B)
+            </button>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB PANEL 3: OCR IMAGE TRANSLATION -->
+    <div id="ocrPanel" class="panel">
+      <div class="glass-card">
+        <div class="ocr-container">
+          
+          <!-- Input Scanner Side -->
+          <div class="source-col">
+            <h3>1. Scan Source</h3>
+            
+            <!-- Upload Box / Live Webcam preview -->
+            <div id="ocrUploadBox" class="ocr-upload-box" onclick="triggerOcrFileInput()">
+              <i class="fa-solid fa-cloud-arrow-up"></i>
+              <span id="ocrBoxText">Click to upload an image or drag & drop</span>
+              <span class="char-count">Supports PNG, JPG, JPEG</span>
+              <input type="file" id="ocrFileInput" class="ocr-file-input" accept="image/*" onchange="loadOcrImage(event)">
+            </div>
+            
+            <!-- Scan Preview Area -->
+            <div id="ocrPreviewContainer" class="ocr-preview-container">
+              <img id="ocrPreviewImg" alt="OCR Preview">
+              <div class="laser-line"></div>
+            </div>
+
+            <!-- Webcam Live Preview Area -->
+            <div id="webcamContainer" class="webcam-container">
+              <video id="webcamVideo" class="webcam-video" autoplay playinline></video>
+            </div>
+
+            <!-- Image controls -->
+            <div class="ocr-controls">
+              <button class="ocr-btn" onclick="triggerOcrFileInput()">
+                <i class="fa-solid fa-image"></i> Choose File
+              </button>
+              <button id="webcamToggleBtn" class="ocr-btn" onclick="toggleWebcam()">
+                <i class="fa-solid fa-camera"></i> Live Camera
+              </button>
+              <button id="captureBtn" class="ocr-btn" style="display:none;" onclick="captureWebcamImage()">
+                <i class="fa-solid fa-crop-simple"></i> Capture & Scan
+              </button>
+              <button id="ocrStartBtn" class="ocr-btn primary" onclick="runOcrScan()" disabled>
+                <i class="fa-solid fa-magnifying-glass"></i> Perform Text Scan
+              </button>
+            </div>
+
+            <!-- OCR Progress Bar -->
+            <div id="ocrProgressContainer" class="ocr-progress-container">
+              <div id="ocrProgressBar" class="ocr-progress-bar"></div>
+            </div>
+            <div id="ocrStatusText" class="ocr-status-text">Ready to scan...</div>
+          </div>
+
+          <!-- Output OCR Results -->
+          <div class="target-col">
+            <h3>2. Translated Output</h3>
+            
+            <div class="lang-select-wrapper">
+              <i class="fa-solid fa-language"></i>
+              <select id="ocrTgtLang" class="lang-select" onchange="translateOcrText()">
+                <!-- Populated dynamically -->
+              </select>
+            </div>
+
+            <div class="textarea-container">
+              <textarea id="ocrExtractedText" class="translation-textarea" placeholder="Extracted text will appear here..." oninput="translateOcrText()"></textarea>
+              <div class="textarea-footer">
+                <span>Scanned Text</span>
+                <button class="action-btn" title="Copy scanned text" onclick="copyToClipboard('ocrExtractedText')">
+                  <i class="fa-solid fa-copy"></i>
+                </button>
+              </div>
+            </div>
+
+            <div class="textarea-container">
+              <textarea id="ocrTranslatedText" class="translation-textarea" placeholder="Translation will appear here..." readonly></textarea>
+              <div class="textarea-footer">
+                <span>Translated Output</span>
+                <div class="action-icons">
+                  <button class="action-btn" title="Copy translation" onclick="copyToClipboard('ocrTranslatedText')">
+                    <i class="fa-solid fa-copy"></i>
+                  </button>
+                  <button class="action-btn" title="Read translation out loud" onclick="speakTextFromArea('ocrTranslatedText', 'ocrTgtLang')">
+                    <i class="fa-solid fa-volume-high"></i>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB PANEL 6: AI CHATBOT -->
+    <div id="chatPanel" class="panel">
+      <div class="glass-card">
+        <div class="ocr-container">
+          
+          <div class="source-col" style="flex-grow: 2;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; flex-wrap: wrap; gap: 10px;">
+              <h3 style="display: flex; align-items: center; gap: 8px;"><i class="fa-solid fa-robot" style="color: var(--accent-secondary);"></i> AI Language Coach</h3>
+              <select id="chatTopicSelect" class="lang-select" style="max-width: 200px; padding: 6px 10px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: #fff;" onchange="changeChatTopic()">
+                <option value="basics">Greetings & Basics</option>
+                <option value="food">Ordering Food</option>
+                <option value="travel">Travel & Directions</option>
+                <option value="daily">Daily Chat</option>
+              </select>
+            </div>
+            
+            <div id="chatHistory" class="convo-history" style="height: 380px;">
+            </div>
+            
+            <div style="display: flex; gap: 10px; align-items: center; margin-top: 10px; width: 100%;">
+              <div class="textarea-container" style="flex-grow: 1; min-height: unset; border-radius: 12px;">
+                <input type="text" id="chatInput" style="width: 100%; background: transparent; border: none; outline: none; color: var(--text-main); padding: 12px 16px; font-size: 1rem; font-family: inherit;" placeholder="Type your response in English or target language..." onkeydown="handleChatKey(event)">
+              </div>
+              <button id="chatMicBtn" class="action-btn" style="width: 48px; height: 48px; border-radius: 12px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);" title="Speak message" onclick="toggleChatVoiceInput()">
+                <i class="fa-solid fa-microphone"></i>
+              </button>
+              <button class="ocr-btn primary" style="padding: 12px 24px; border-radius: 12px; height: 48px; font-size: 0.95rem; font-weight: 700; background: linear-gradient(135deg, var(--accent-secondary) 0%, #0891b2 100%); border: none; box-shadow: 0 4px 15px rgba(6, 182, 212, 0.3); color: white; cursor: pointer; display: flex; align-items: center; gap: 8px;" onclick="sendChatMessage()">
+                <i class="fa-solid fa-paper-plane"></i> Send
+              </button>
+            </div>
+          </div>
+          
+          <div class="target-col" style="flex-grow: 1;">
+            <h3>Tutor Assistance</h3>
+            <div class="convo-card" style="padding: 16px; background: rgba(0,0,0,0.15);">
+              <h4 style="font-size: 0.95rem; color: var(--accent-secondary); margin-bottom: 8px;">Target Language</h4>
+              <div class="lang-select-wrapper">
+                <i class="fa-solid fa-graduation-cap"></i>
+                <select id="chatTargetLang" class="lang-select" onchange="changeChatTargetLang()">
+                </select>
+              </div>
+              
+              <div style="margin-top: 20px;">
+                <h4 style="font-size: 0.95rem; color: var(--accent-tertiary); margin-bottom: 8px;">Suggested Replies</h4>
+                <div id="suggestedRepliesList" style="display: flex; flex-direction: column; gap: 10px;">
+                </div>
+              </div>
+              
+              <div style="margin-top: 25px; border-top: 1px dashed rgba(255,255,255,0.08); padding-top: 15px;">
+                <h4 style="font-size: 0.95rem; color: #a5b4fc; margin-bottom: 8px;">Tutor Advice</h4>
+                <p id="tutorAdviceText" style="font-size: 0.85rem; color: var(--text-muted); line-height: 1.5;">
+                  Type a response to practice your conversational skills! The suggestions above give you ideas on what to say.
+                </p>
+              </div>
+            </div>
+          </div>
+          
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB PANEL 4: SAVED PHRASES & HISTORY LOGS -->
+    <div id="archivePanel" class="panel">
+      <div class="glass-card">
+        <div class="archive-grid">
+          
+          <!-- Starred Saved Column -->
+          <div class="archive-col">
+            <div class="archive-title">
+              <span><i class="fa-solid fa-star" style="color: gold;"></i> Saved Phrases</span>
+              <button onclick="clearAllSaved()">Clear All</button>
+            </div>
+            <div id="savedList" class="archive-list">
+              <!-- Saved items populated dynamically -->
+            </div>
+          </div>
+
+          <!-- History Logs Column -->
+          <div class="archive-col">
+            <div class="archive-title">
+              <span><i class="fa-solid fa-clock-rotate-left" style="color: var(--accent-secondary);"></i> Recent History</span>
+              <button onclick="clearHistory()">Clear History</button>
+            </div>
+            <div id="historyList" class="archive-list">
+              <!-- History items populated dynamically -->
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB PANEL 5: VOICE CONFIGURATION SETTINGS -->
+    <div id="settingsPanel" class="panel">
+      <div class="glass-card">
+        <h3 style="margin-bottom: 20px;"><i class="fa-solid fa-circle-play"></i> Text-to-Speech Settings</h3>
+        <div class="settings-grid">
+          
+          <div class="setting-group">
+            <label for="ttsRate">Speech Velocity (Rate)</label>
+            <div class="range-slider-wrapper">
+              <i class="fa-solid fa-gauge-high"></i>
+              <input type="range" id="ttsRate" class="range-slider" min="0.5" max="2.0" step="0.1" value="1.0" oninput="updateSliderVal('ttsRate', 'rateVal')">
+              <span id="rateVal" class="slider-val">1.0</span>
+            </div>
+          </div>
+
+          <div class="setting-group">
+            <label for="ttsPitch">Speech Tone (Pitch)</label>
+            <div class="range-slider-wrapper">
+              <i class="fa-solid fa-sliders"></i>
+              <input type="range" id="ttsPitch" class="range-slider" min="0.5" max="2.0" step="0.1" value="1.0" oninput="updateSliderVal('ttsPitch', 'pitchVal')">
+              <span id="pitchVal" class="slider-val">1.0</span>
+            </div>
+          </div>
+
+          <div class="setting-group" style="grid-column: 1 / -1;">
+            <label for="ttsVoiceSelect">System Voice Profile (Optional Override)</label>
+            <div class="lang-select-wrapper">
+              <i class="fa-solid fa-headset"></i>
+              <select id="ttsVoiceSelect" class="lang-select">
+                <!-- Dynamically loaded -->
+              </select>
+            </div>
+            <span class="char-count" style="margin-top: 4px;">Defaults to native language speakers. Chrome/Edge offer higher quality voices.</span>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <!-- Floating Audio Waveform HUD -->
+    <div id="waveformOverlay" class="waveform-overlay">
+      <div class="waveform-text">
+        <i class="fa-solid fa-circle-notch"></i>
+        <span id="waveformStatus">Listening...</span>
+      </div>
+      <canvas id="waveformCanvas" class="waveform-canvas"></canvas>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toastNotification" class="toast">
+      <i class="fa-solid fa-check-double"></i>
+      <span id="toastMsg">Action completed successfully.</span>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+      <p>&copy; 2026 LumixTranslate. Developed using advanced web APIs and Google AI. <a href="#">API Documentation</a></p>
+    </footer>
+
+  </div>
+
+  <script>
+    // Local list fallback of languages if server api is unreachable
+    const FALLBACK_LANGUAGES = {
+      "auto": "Auto Detect", "en": "English", "hi": "Hindi", "te": "Telugu",
+      "ta": "Tamil", "kn": "Kannada", "ml": "Malayalam", "bn": "Bengali",
+      "mr": "Marathi", "gu": "Gujarati", "pa": "Punjabi", "ur": "Urdu",
+      "es": "Spanish", "fr": "French", "de": "German", "it": "Italian",
+      "pt": "Portuguese", "ru": "Russian", "ja": "Japanese", "ko": "Korean",
+      "zh-CN": "Chinese (Simplified)", "ar": "Arabic", "tr": "Turkish"
+    };
+
+    // Dictionary of offline translation common greetings (English -> target fallbacks)
+    const OFFLINE_DICTIONARY = {
+      hi: { "hello": "नमस्ते", "welcome": "स्वागत", "thank you": "धन्यवाद", "how are you": "आप कैसे हैं", "good morning": "सुप्रभात", "my name is": "मेरा नाम है", "goodbye": "अलविदा" },
+      te: { "hello": "నమస్తే", "welcome": "స్వాగతం", "thank you": "ధన్యవాదాలు", "how are you": "మీరు ఎలా ఉన్నారు", "good morning": "శుభోదయం", "my name is": "నా పేరు", "goodbye": "వీడ్కోలు" },
+      es: { "hello": "hola", "welcome": "bienvenido", "thank you": "gracias", "how are you": "cómo estás", "good morning": "buenos días", "my name is": "mi nombre es", "goodbye": "adiós" },
+      fr: { "hello": "bonjour", "welcome": "bienvenue", "thank you": "merci", "how are you": "comment ça va", "good morning": "bonjour", "my name is": "je m'appelle", "goodbye": "au revoir" }
+    };
+
+    // Map common languages to Tesseract language codes
+    const TESSERACT_LANGS = {
+      en: 'eng', hi: 'hin', te: 'tel', ta: 'tam', kn: 'kan', ml: 'mal',
+      bn: 'ben', mr: 'mar', gu: 'guj', pa: 'pan', ur: 'urd', es: 'spa',
+      fr: 'fra', de: 'deu', it: 'ita', pt: 'por', ru: 'rus', ja: 'jpn',
+      ko: 'kor', 'zh-CN': 'chi_sim', ar: 'ara', tr: 'tur'
+    };
+
+    // Core States
+    const translationCache = new Map();
+    let lastTranslationEngine = 'google_gtx';
+    let languages = {};
+    let isOffline = false;
+    let translationDebounceTimer = null;
+    let voiceRecognition = null;
+    let activeMicBtn = null;
+    let activeTextAreaId = null;
+    let savedPhrases = [];
+    let translationHistory = [];
+    let ttsVoices = [];
+    let canvasAnimationId = null;
+    let webcamStream = null;
+    let currentOcrImageFile = null;
+
+    // Theme Switcher Engine
+    function setAppTheme(themeName) {
+      document.body.className = '';
+      if (themeName && themeName !== 'theme-lumix') {
+        document.body.classList.add(themeName);
+      }
+      localStorage.setItem('app_color_theme', themeName || 'theme-lumix');
+
+      // Update theme dots UI
+      const dots = document.querySelectorAll('.theme-dot');
+      dots.forEach(dot => dot.classList.remove('active'));
+      const activeDot = document.querySelector(`.theme-dot-${(themeName || 'theme-lumix').replace('theme-', '')}`);
+      if (activeDot) activeDot.classList.add('active');
+    }
+
+    function initAppTheme() {
+      const savedTheme = localStorage.getItem('app_color_theme');
+      if (savedTheme) {
+        setAppTheme(savedTheme);
+      }
+    }
+
+    // Run Initialization
+    window.addEventListener('DOMContentLoaded', async () => {
+      // 0. Initialize visual theme
+      initAppTheme();
+
+      // 1. Check network connection
+      checkNetworkStatus();
+      window.addEventListener('online', checkNetworkStatus);
+      window.addEventListener('offline', checkNetworkStatus);
+      
+      // 2. Load languages
+      await loadLanguages();
+      
+      // 3. Load Saved & History from localStorage
+      loadLocalStorage();
+      
+      // 4. Initialise speech engine
+      initSpeechEngine();
+    });
+
+    // Network checking
+    function checkNetworkStatus() {
+      isOffline = !navigator.onLine;
+      const banner = document.getElementById('connectionBanner');
+      if (isOffline) {
+        banner.classList.add('active');
+      } else {
+        banner.classList.remove('active');
+      }
+    }
+
+    // Load Languages list
+    async function loadLanguages() {
+      try {
+        const response = await fetch('/api/languages');
+        if (response.ok) {
+          languages = await response.json();
+        } else {
+          throw new Error("HTTP error fetching languages");
+        }
+      } catch (err) {
+        console.warn("Failed fetching languages from server. Falling back to local values.", err);
+        languages = FALLBACK_LANGUAGES;
+      }
+      
+      // Populate select lists
+      populateLanguageSelects();
+    }
+
+    function populateLanguageSelects() {
+      const selects = [
+        { id: 'srcLangSelect', defaultVal: 'auto' },
+        { id: 'tgtLangSelect', defaultVal: 'hi' },
+        { id: 'convoLangA', defaultVal: 'en' },
+        { id: 'convoLangB', defaultVal: 'te' },
+        { id: 'ocrTgtLang', defaultVal: 'en' },
+        { id: 'chatTargetLang', defaultVal: 'te' }
+      ];
+
+      selects.forEach(selInfo => {
+        const select = document.getElementById(selInfo.id);
+        if (!select) return;
+        
+        select.innerHTML = '';
+        
+        // Populate
+        for (const [code, name] of Object.entries(languages)) {
+          // Skip 'auto' for target select lists
+          if (code === 'auto' && selInfo.id !== 'srcLangSelect') continue;
+          
+          const opt = document.createElement('option');
+          opt.value = code;
+          opt.textContent = name;
+          if (code === selInfo.defaultVal) {
+            opt.selected = true;
+          }
+          select.appendChild(opt);
+        }
+      });
+    }
+
+    // Tab Switching Layout
+    function switchTab(evt, tabId) {
+      // Toggle nav buttons active class
+      const tabBtns = document.querySelectorAll('.tab-btn');
+      tabBtns.forEach(btn => btn.classList.remove('active'));
+      evt.currentTarget.classList.add('active');
+
+      // Toggle panel elements
+      const panels = document.querySelectorAll('.panel');
+      panels.forEach(p => p.classList.remove('active'));
+      
+      const targetPanel = document.getElementById(tabId);
+      if (targetPanel) {
+        targetPanel.classList.add('active');
+      }
+      
+      // Stop webcam stream if leaving OCR scanner
+      if (tabId !== 'ocrPanel') {
+        stopWebcam();
+      }
+    }
+
+    // Slider UI updates
+    function updateSliderVal(sliderId, labelId) {
+      const slider = document.getElementById(sliderId);
+      const label = document.getElementById(labelId);
+      if (slider && label) {
+        label.textContent = slider.value;
+      }
+    }
+
+    // Debounce real-time translation typing
+    function debounceTranslate() {
+      const text = document.getElementById('srcTextArea').value;
+      
+      // Update character counter
+      document.getElementById('srcCharCount').textContent = `${text.length} / 5000`;
+
+      clearTimeout(translationDebounceTimer);
+      if (text.trim().length === 0) {
+        document.getElementById('tgtTextArea').value = '';
+        document.getElementById('tgtCharCount').textContent = '0';
+        updateStarStatus(false);
+        return;
+      }
+      
+      translationDebounceTimer = setTimeout(() => {
+        triggerTranslation();
+      }, 350);
+    }
+
+    // Clear source text
+    function clearSrcText() {
+      document.getElementById('srcTextArea').value = '';
+      document.getElementById('tgtTextArea').value = '';
+      document.getElementById('srcCharCount').textContent = '0 / 5000';
+      document.getElementById('tgtCharCount').textContent = '0';
+      updateStarStatus(false);
+    }
+
+    // Swap Source and Target Languages
+    function swapLanguages() {
+      const srcSelect = document.getElementById('srcLangSelect');
+      const tgtSelect = document.getElementById('tgtLangSelect');
+      
+      let srcVal = srcSelect.value;
+      let tgtVal = tgtSelect.value;
+
+      // Cannot swap to Auto Detect
+      if (srcVal === 'auto') {
+        srcVal = 'en';
+      }
+
+      srcSelect.value = tgtVal;
+      tgtSelect.value = srcVal;
+
+      // Swap text areas
+      const srcText = document.getElementById('srcTextArea').value;
+      const tgtText = document.getElementById('tgtTextArea').value;
+
+      document.getElementById('srcTextArea').value = tgtText;
+      document.getElementById('tgtTextArea').value = srcText;
+      
+      // Recalculate character counters
+      document.getElementById('srcCharCount').textContent = `${tgtText.length} / 5000`;
+      document.getElementById('tgtCharCount').textContent = srcText.length;
+
+      triggerTranslation();
+    }
+
+    function onSourceLangChange() {
+      // If language changed, trigger translate
+      triggerTranslation();
+    }
+
+    function updateEngineBadge(engine) {
+      const badge = document.getElementById('translationEngineBadge');
+      if (!badge) return;
+      
+      badge.style.opacity = '1';
+      if (engine === 'cache') {
+        badge.textContent = 'Instant (Cached)';
+        badge.style.background = 'rgba(16, 185, 129, 0.15)';
+        badge.style.color = '#34d399';
+      } else if (engine === 'google_gtx') {
+        badge.textContent = 'Google AI engine';
+        badge.style.background = 'rgba(99, 102, 241, 0.15)';
+        badge.style.color = '#a5b4fc';
+      } else if (engine === 'backend_proxy') {
+        badge.textContent = 'Lumix AI engine';
+        badge.style.background = 'rgba(6, 182, 212, 0.15)';
+        badge.style.color = '#22d3ee';
+      } else if (engine === 'mymemory') {
+        badge.textContent = 'MyMemory engine';
+        badge.style.background = 'rgba(236, 72, 153, 0.15)';
+        badge.style.color = '#f9a8d4';
+      } else if (engine === 'offline') {
+        badge.textContent = 'Offline dictionary';
+        badge.style.background = 'rgba(245, 158, 11, 0.15)';
+        badge.style.color = '#fbbf24';
+      } else {
+        badge.style.opacity = '0';
+      }
+    }
+
+    // Core Translation Execution Wrapper
+    async function triggerTranslation() {
+      const srcText = document.getElementById('srcTextArea').value.trim();
+      const srcLang = document.getElementById('srcLangSelect').value;
+      const tgtLang = document.getElementById('tgtLangSelect').value;
+
+      if (!srcText) {
+        const badge = document.getElementById('translationEngineBadge');
+        if (badge) badge.style.opacity = '0';
+        return;
+      }
+
+      const outputTextArea = document.getElementById('tgtTextArea');
+      outputTextArea.placeholder = 'Translating in progress...';
+      
+      try {
+        const translated = await translateApiCall(srcText, srcLang, tgtLang);
+        outputTextArea.value = translated;
+        document.getElementById('tgtCharCount').textContent = translated.length;
+        
+        // Update engine badge display
+        updateEngineBadge(lastTranslationEngine);
+
+        // Add to history
+        addHistoryItem(srcText, translated, srcLang, tgtLang);
+        // Check starred status
+        checkStarredState(srcText, translated, srcLang, tgtLang);
+      } catch (err) {
+        outputTextArea.value = `Error executing translation: ${err.message}`;
+      }
+    }
+
+    // Call translation endpoints with multiple fallbacks
+    async function translateApiCall(text, source, target) {
+      if (isOffline) {
+        lastTranslationEngine = 'offline';
+        return localDictionaryLookup(text, source, target);
+      }
+
+      const cacheKey = `${source}_${target}_${text.trim()}`;
+      if (translationCache.has(cacheKey)) {
+        lastTranslationEngine = 'cache';
+        return translationCache.get(cacheKey);
+      }
+
+      // 1. Try Google client GTX API (Fastest and robust client-side)
+      try {
+        const sl = source === 'auto' ? 'auto' : source;
+        const gtxUrl = `https://translate.googleapis.com/translate_a/single?client=gtx&sl={sl}&tl={target}&dt=t&q={encodeURIComponent(text)}`;
+        const finalUrl = gtxUrl.replace('{sl}', sl).replace('{target}', target).replace('{encodeURIComponent(text)}', encodeURIComponent(text));
+        const res = await fetch(finalUrl);
+        if (res.ok) {
+          const data = await res.json();
+          const translatedChunks = data[0].map(chunk => chunk[0]);
+          const result = translatedChunks.join('');
+          translationCache.set(cacheKey, result);
+          lastTranslationEngine = 'google_gtx';
+          return result;
+        }
+      } catch (err) {
+        console.warn("Client Google Translate API failed. Trying backend proxy API...", err);
+      }
+
+      // 2. Try Backend API
+      try {
+        const res = await fetch('/api/translate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ text, source, target })
+        });
+        if (res.ok) {
+          const data = await res.json();
+          translationCache.set(cacheKey, data.translatedText);
+          lastTranslationEngine = 'backend_proxy';
+          return data.translatedText;
+        }
+      } catch (err) {
+        console.warn("Backend Proxy Translate API failed. Trying client MyMemory API...", err);
+      }
+
+      // 3. Try Client-side MyMemory API
+      try {
+        const langPair = source === 'auto' ? `autodetect|${target}` : `${source}|${target}`;
+        const myMemoryUrl = `https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=${langPair}`;
+        const res = await fetch(myMemoryUrl);
+        if (res.ok) {
+          const data = await res.json();
+          if (data.responseData) {
+            const result = data.responseData.translatedText;
+            translationCache.set(cacheKey, result);
+            lastTranslationEngine = 'mymemory';
+            return result;
+          }
+        }
+      } catch (err) {
+        console.error("All translation engines failed.", err);
+      }
+
+      // Offline dictionary as final resort
+      const finalFallback = localDictionaryLookup(text, source, target);
+      translationCache.set(cacheKey, finalFallback);
+      lastTranslationEngine = 'offline';
+      return finalFallback;
+    }
+
+    // Local offline dictionary search
+    function localDictionaryLookup(text, source, target) {
+      const lower = text.toLowerCase().trim().replace(/[.,/#!$%^&*;:{}=\-_`~()]/g,"");
+      
+      // Lookup
+      if (OFFLINE_DICTIONARY[target] && OFFLINE_DICTIONARY[target][lower]) {
+        return OFFLINE_DICTIONARY[target][lower];
+      }
+      
+      // Word by word fallback
+      const words = lower.split(/\s+/);
+      const translatedWords = words.map(w => {
+        if (OFFLINE_DICTIONARY[target] && OFFLINE_DICTIONARY[target][w]) {
+          return OFFLINE_DICTIONARY[target][w];
+        }
+        return w; // Keep original if unknown
+      });
+      
+      return `[Offline Mode] ${translatedWords.join(' ')}`;
+    }
+
+    // Speech-to-Text Dictation logic
+    function initSpeechEngine() {
+      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+      if (!SpeechRecognition) {
+        console.warn("Web SpeechRecognition API not supported in this browser.");
+        return;
+      }
+      
+      voiceRecognition = new SpeechRecognition();
+      voiceRecognition.interimResults = false;
+      voiceRecognition.maxAlternatives = 1;
+
+      voiceRecognition.onstart = () => {
+        showWaveformHUD(true);
+        if (activeMicBtn) activeMicBtn.classList.add('active');
+      };
+
+      voiceRecognition.onerror = (event) => {
+        console.error("Voice recognition error: ", event.error);
+        showToast(`Voice capture failed: ${event.error}`);
+        stopVoiceRecognition();
+      };
+
+      voiceRecognition.onend = () => {
+        stopVoiceRecognition();
+      };
+
+      voiceRecognition.onresult = async (event) => {
+        const transcript = event.results[0][0].transcript;
+        
+        if (activeTextAreaId) {
+          const textArea = document.getElementById(activeTextAreaId);
+          textArea.value = (textArea.value + " " + transcript).trim();
+          textArea.dispatchEvent(new Event('input')); // trigger translate
+          showToast("Voice captured successfully!");
+        }
+      };
+    }
+
+    function toggleVoiceInput(textAreaId, buttonId, langSelectId) {
+      if (!voiceRecognition) {
+        showToast("Speech Recognition not supported in this browser. Try Chrome or Edge.");
+        return;
+      }
+
+      // Stop any running text-to-speech playing
+      window.speechSynthesis.cancel();
+      if (window.currentPlayingAudio) {
+        window.currentPlayingAudio.pause();
+        window.currentPlayingAudio = null;
+      }
+
+      if (activeMicBtn) {
+        // Already listening, stop it
+        stopVoiceRecognition();
+        return;
+      }
+
+      activeMicBtn = document.getElementById(buttonId);
+      activeTextAreaId = textAreaId;
+      
+      const langCode = document.getElementById(langSelectId).value;
+      voiceRecognition.lang = getVoiceBcp47Lang(langCode);
+      
+      // Start listening
+      try {
+        voiceRecognition.start();
+        startProceduralWaveform();
+      } catch (err) {
+        console.error("Speech Recognition start error: ", err);
+        stopVoiceRecognition();
+      }
+    }
+
+    function stopVoiceRecognition() {
+      if (voiceRecognition) {
+        try { voiceRecognition.stop(); } catch(e){}
+      }
+      if (activeMicBtn) {
+        activeMicBtn.classList.remove('active');
+        activeMicBtn.classList.remove('recording');
+      }
+      activeMicBtn = null;
+      activeTextAreaId = null;
+      showWaveformHUD(false);
+      stopProceduralWaveform();
+    }
+
+    // Helper: Map ISO language to browser BCP47 code
+    function getVoiceBcp47Lang(isoCode) {
+      const map = {
+        en: 'en-US', hi: 'hi-IN', te: 'te-IN', ta: 'ta-IN', kn: 'kn-IN',
+        ml: 'ml-IN', bn: 'bn-IN', mr: 'mr-IN', gu: 'gu-IN', pa: 'pa-IN',
+        ur: 'ur-PK', es: 'es-ES', fr: 'fr-FR', de: 'de-DE', it: 'it-IT',
+        pt: 'pt-BR', ru: 'ru-RU', ja: 'ja-JP', ko: 'ko-KR', zh: 'zh-CN',
+        'zh-CN': 'zh-CN', ar: 'ar-EG', tr: 'tr-TR'
+      };
+      return map[isoCode] || 'en-US';
+    }
+
+    // Text-To-Speech Read Aloud functions
+    function speakTextFromArea(textAreaId, langSelectId) {
+      const text = document.getElementById(textAreaId).value.trim();
+      const lang = document.getElementById(langSelectId).value;
+
+      if (!text) {
+        showToast("No text to speak.");
+        return;
+      }
+
+      speakText(text, lang);
+    }
+
+    function speakText(text, langCode) {
+      if (!('speechSynthesis' in window)) {
+        showToast("Speech Synthesis is not supported in this browser.");
+        return;
+      }
+
+      // Stop any running speech
+      window.speechSynthesis.cancel();
+      if (window.currentPlayingAudio) {
+        window.currentPlayingAudio.pause();
+        window.currentPlayingAudio = null;
+      }
+
+      const utterance = new SynthesisUtteranceWrapper(text);
+      const bcp = getVoiceBcp47Lang(langCode);
+      utterance.lang = bcp;
+
+      // Custom configuration parameters
+      const customRate = parseFloat(document.getElementById('ttsRate').value);
+      const customPitch = parseFloat(document.getElementById('ttsPitch').value);
+      const customVoiceOverride = document.getElementById('ttsVoiceSelect').value;
+
+      utterance.rate = customRate;
+      utterance.pitch = customPitch;
+
+      // If no custom system voice override is chosen, use our high-quality backend proxy route
+      if (!customVoiceOverride) {
+        try {
+          const ttsUrl = `/api/tts?lang=${langCode}&text=${encodeURIComponent(text)}`;
+          const audio = new Audio(ttsUrl);
+          audio.playbackRate = customRate;
+          window.currentPlayingAudio = audio;
+          
+          audio.onplay = () => {
+            showWaveformHUD(true, "Speaking...");
+            startProceduralWaveform();
+          };
+          audio.onended = () => {
+            showWaveformHUD(false);
+            stopProceduralWaveform();
+            window.currentPlayingAudio = null;
+          };
+          audio.onerror = (e) => {
+            console.error("Backend TTS failed, trying browser native SpeechSynthesis...", e);
+            window.speechSynthesis.speak(utterance);
+          };
+          audio.play();
+          return;
+        } catch (err) {
+          console.error("Audio playback error, using standard SpeechSynthesis", err);
+        }
+      }
+
+      let suitableVoice = ttsVoices.find(v => v.voiceURI === customVoiceOverride);
+      if (suitableVoice) {
+        utterance.voice = suitableVoice;
+      }
+
+      utterance.onstart = () => {
+        showWaveformHUD(true, "Speaking...");
+        startProceduralWaveform();
+      };
+      
+      utterance.onend = () => {
+        showWaveformHUD(false);
+        stopProceduralWaveform();
+      };
+      
+      utterance.onerror = (e) => {
+        console.error("Speech Synthesis error", e);
+        showWaveformHUD(false);
+        stopProceduralWaveform();
+      };
+
+      window.speechSynthesis.speak(utterance);
+    }
+
+    // Use standard window.SpeechSynthesisUtterance
+    const SynthesisUtteranceWrapper = window.SpeechSynthesisUtterance;
+
+    // Dynamic browser voices loading
+    function loadTtsVoices() {
+      if (!('speechSynthesis' in window)) return;
+      
+      ttsVoices = window.speechSynthesis.getVoices();
+      const voiceSelect = document.getElementById('ttsVoiceSelect');
+      if (!voiceSelect) return;
+
+      voiceSelect.innerHTML = '<option value="">-- Use Native Auto-Selected Voice --</option>';
+      
+      // Sort and populate
+      ttsVoices.sort((a,b) => a.name.localeCompare(b.name)).forEach(v => {
+        const opt = document.createElement('option');
+        opt.value = v.voiceURI;
+        opt.textContent = `${v.name} (${v.lang})`;
+        voiceSelect.appendChild(opt);
+      });
+    }
+
+    // Event listener for voice loaded
+    if ('speechSynthesis' in window) {
+      window.speechSynthesis.onvoiceschanged = loadTtsVoices;
+      loadTtsVoices();
+    }
+
+    // Canvas procedural voice waveform visualizer (sine waves)
+    function showWaveformHUD(show, statusText = "Listening...") {
+      const HUD = document.getElementById('waveformOverlay');
+      const statusLabel = document.getElementById('waveformStatus');
+      if (show) {
+        statusLabel.textContent = statusText;
+        HUD.classList.add('active');
+      } else {
+        HUD.classList.remove('active');
+      }
+    }
+
+    function startProceduralWaveform() {
+      const canvas = document.getElementById('waveformCanvas');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      
+      let angle = 0;
+      
+      function draw() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        
+        ctx.lineWidth = 2;
+        ctx.strokeStyle = '#06b6d4'; // Cyan
+        ctx.beginPath();
+        
+        for (let x = 0; x < canvas.width; x++) {
+          const y = canvas.height / 2 + Math.sin(angle + x * 0.08) * 12 * Math.sin(angle * 1.5);
+          if (x === 0) {
+            ctx.moveTo(x, y);
+          } else {
+            ctx.lineTo(x, y);
+          }
+        }
+        ctx.stroke();
+
+        // Second overlay wave (Purple)
+        ctx.strokeStyle = '#8b5cf6';
+        ctx.beginPath();
+        for (let x = 0; x < canvas.width; x++) {
+          const y = canvas.height / 2 + Math.cos(angle + x * 0.06 + Math.PI/4) * 8 * Math.cos(angle);
+          if (x === 0) {
+            ctx.moveTo(x, y);
+          } else {
+            ctx.lineTo(x, y);
+          }
+        }
+        ctx.stroke();
+
+        angle += 0.15;
+        canvasAnimationId = requestAnimationFrame(draw);
+      }
+      
+      cancelAnimationFrame(canvasAnimationId);
+      draw();
+    }
+
+    function stopProceduralWaveform() {
+      cancelAnimationFrame(canvasAnimationId);
+      const canvas = document.getElementById('waveformCanvas');
+      if (canvas) {
+        const ctx = canvas.getContext('2d');
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+      }
+    }
+
+    // SPEECH TO SPEECH: CONVERSATION MODE
+    let convoRecognition = null;
+    let currentConvoSide = null;
+
+    function startConvoListening(side) {
+      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+      if (!SpeechRecognition) {
+        showToast("Speech Recognition not supported in this browser. Try Chrome/Edge.");
+        return;
+      }
+
+      // Stop any running text-to-speech playing
+      window.speechSynthesis.cancel();
+      if (window.currentPlayingAudio) {
+        window.currentPlayingAudio.pause();
+        window.currentPlayingAudio = null;
+      }
+
+      // If already listening somewhere, stop first
+      if (convoRecognition) {
+        stopConvoListening();
+        return;
+      }
+
+      currentConvoSide = side;
+      const micBtn = document.getElementById(`convoMicBtn${side}`);
+      micBtn.classList.add('recording');
+      micBtn.innerHTML = `<i class="fa-solid fa-circle-notch fa-spin"></i> Listening Voice...`;
+
+      convoRecognition = new SpeechRecognition();
+      convoRecognition.interimResults = false;
+      convoRecognition.maxAlternatives = 1;
+
+      // Language configuration
+      const langA = document.getElementById('convoLangA').value;
+      const langB = document.getElementById('convoLangB').value;
+      convoRecognition.lang = getVoiceBcp47Lang(side === 'A' ? langA : langB);
+
+      convoRecognition.onstart = () => {
+        showWaveformHUD(true, `Person ${side} Speaking...`);
+        startProceduralWaveform();
+      };
+
+      convoRecognition.onerror = (e) => {
+        console.error("Convo recognition error", e);
+        showToast("Failed capturing voice speech.");
+        stopConvoListening();
+      };
+
+      convoRecognition.onend = () => {
+        stopConvoListening();
+      };
+
+      convoRecognition.onresult = async (event) => {
+        const transcript = event.results[0][0].transcript;
+        
+        // Target languages
+        const sourceLang = side === 'A' ? langA : langB;
+        const targetLang = side === 'A' ? langB : langA;
+        
+        // Output translation bubble bubbles
+        const historyA = document.getElementById('convoHistoryA');
+        const historyB = document.getElementById('convoHistoryB');
+
+        // Create bubble for Speaker
+        const sourceBubble = document.createElement('div');
+        sourceBubble.className = `convo-bubble ${side === 'A' ? 'sent' : 'received'}`;
+        sourceBubble.textContent = transcript;
+        
+        if (side === 'A') {
+          historyA.appendChild(sourceBubble);
+          historyA.scrollTop = historyA.scrollHeight;
+        } else {
+          historyB.appendChild(sourceBubble);
+          historyB.scrollTop = historyB.scrollHeight;
+        }
+
+        // Perform translation API call
+        try {
+          const translated = await translateApiCall(transcript, sourceLang, targetLang);
+          
+          // Create bubble for receiver
+          const targetBubble = document.createElement('div');
+          targetBubble.className = `convo-bubble ${side === 'A' ? 'received' : 'sent'}`;
+          targetBubble.innerHTML = `<strong>Translation:</strong><br>${translated}`;
+          
+          if (side === 'A') {
+            historyB.appendChild(targetBubble);
+            historyB.scrollTop = historyB.scrollHeight;
+          } else {
+            historyA.appendChild(targetBubble);
+            historyA.scrollTop = historyA.scrollHeight;
+          }
+
+          // Read translation speech output
+          speakText(translated, targetLang);
+          // Add to History
+          addHistoryItem(transcript, translated, sourceLang, targetLang);
+        } catch (err) {
+          showToast("Translation error in conversation.");
+        }
+      };
+
+      try {
+        convoRecognition.start();
+      } catch (err) {
+        console.error("Convo Recognition start error", err);
+        stopConvoListening();
+      }
+    }
+
+    function stopConvoListening() {
+      if (convoRecognition) {
+        try { convoRecognition.stop(); } catch(e){}
+      }
+      convoRecognition = null;
+      
+      const btnA = document.getElementById('convoMicBtnA');
+      const btnB = document.getElementById('convoMicBtnB');
+      btnA.classList.remove('recording');
+      btnB.classList.remove('recording');
+      btnA.innerHTML = `<i class="fa-solid fa-microphone"></i> Tap & Speak (Person A)`;
+      btnB.innerHTML = `<i class="fa-solid fa-microphone"></i> Tap & Speak (Person B)`;
+      
+      showWaveformHUD(false);
+      stopProceduralWaveform();
+    }
+
+    // OCR CAMERA IMAGE TEXT SCANNING
+    function triggerOcrFileInput() {
+      document.getElementById('ocrFileInput').click();
+    }
+
+    function loadOcrImage(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      currentOcrImageFile = file;
+      displayOcrPreview(file);
+    }
+
+    function displayOcrPreview(file) {
+      stopWebcam();
+      
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const previewContainer = document.getElementById('ocrPreviewContainer');
+        const previewImg = document.getElementById('ocrPreviewImg');
+        const uploadBox = document.getElementById('ocrUploadBox');
+        
+        previewImg.src = e.target.result;
+        uploadBox.style.display = 'none';
+        previewContainer.style.display = 'block';
+        
+        document.getElementById('ocrStartBtn').disabled = false;
+      };
+      reader.readAsDataURL(file);
+    }
+
+    // Live Web Camera Feed controls
+    async function toggleWebcam() {
+      const video = document.getElementById('webcamVideo');
+      const container = document.getElementById('webcamContainer');
+      const uploadBox = document.getElementById('ocrUploadBox');
+      const previewContainer = document.getElementById('ocrPreviewContainer');
+      const toggleBtn = document.getElementById('webcamToggleBtn');
+      const captureBtn = document.getElementById('captureBtn');
+
+      if (webcamStream) {
+        stopWebcam();
+        return;
+      }
+
+      // Request camera
+      try {
+        webcamStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' }, audio: false });
+        video.srcObject = webcamStream;
+        
+        uploadBox.style.display = 'none';
+        previewContainer.style.display = 'none';
+        container.style.display = 'block';
+        
+        captureBtn.style.display = 'inline-flex';
+        toggleBtn.innerHTML = `<i class="fa-solid fa-camera-rotate"></i> Close Camera`;
+        document.getElementById('ocrStartBtn').disabled = true;
+      } catch (err) {
+        console.error("Camera access failed:", err);
+        showToast("Failed to access camera device.");
+      }
+    }
+
+    function stopWebcam() {
+      if (webcamStream) {
+        webcamStream.getTracks().forEach(track => track.stop());
+        webcamStream = null;
+      }
+      
+      document.getElementById('webcamContainer').style.display = 'none';
+      document.getElementById('captureBtn').style.display = 'none';
+      document.getElementById('webcamToggleBtn').innerHTML = `<i class="fa-solid fa-camera"></i> Live Camera`;
+    }
+
+    function captureWebcamImage() {
+      const video = document.getElementById('webcamVideo');
+      const canvas = document.createElement('canvas');
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+      
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+      
+      canvas.toBlob((blob) => {
+        currentOcrImageFile = blob;
+        displayOcrPreview(blob);
+      }, 'image/jpeg');
+    }
+
+    // OCR Tesseract process
+    async function runOcrScan() {
+      if (!currentOcrImageFile) return;
+
+      const progressContainer = document.getElementById('ocrProgressContainer');
+      const progressBar = document.getElementById('ocrProgressBar');
+      const statusText = document.getElementById('ocrStatusText');
+      const previewContainer = document.getElementById('ocrPreviewContainer');
+
+      progressContainer.style.display = 'block';
+      statusText.style.display = 'block';
+      progressBar.style.width = '0%';
+      statusText.textContent = 'Initializing scanning model...';
+      
+      // Start scanning laser animation class
+      previewContainer.classList.add('scanning');
+      document.getElementById('ocrStartBtn').disabled = true;
+
+      // Detect language mapping
+      const srcLang = document.getElementById('srcLangSelect').value;
+      const tesseractCode = TESSERACT_LANGS[srcLang] || 'eng';
+
+      try {
+        const worker = await Tesseract.createWorker();
+        
+        // Progress updater callback
+        await worker.loadLanguage(tesseractCode);
+        await worker.initialize(tesseractCode);
+        
+        statusText.textContent = 'Scanning document contents...';
+        
+        const { data: { text } } = await worker.recognize(currentOcrImageFile);
+        await worker.terminate();
+
+        // Print output
+        document.getElementById('ocrExtractedText').value = text;
+        showToast("Text extracted successfully!");
+        
+        // Perform OCR translation
+        translateOcrText();
+      } catch (err) {
+        console.error("OCR scan failure: ", err);
+        showToast("Failed to parse text from image.");
+      } finally {
+        previewContainer.classList.remove('scanning');
+        progressContainer.style.display = 'none';
+        statusText.style.display = 'none';
+        document.getElementById('ocrStartBtn').disabled = false;
+      }
+    }
+
+    async function translateOcrText() {
+      const text = document.getElementById('ocrExtractedText').value.trim();
+      const targetLang = document.getElementById('ocrTgtLang').value;
+      const sourceLang = document.getElementById('srcLangSelect').value;
+
+      if (!text) return;
+
+      const outputTextArea = document.getElementById('ocrTranslatedText');
+      outputTextArea.placeholder = 'Translating...';
+
+      try {
+        const translated = await translateApiCall(text, sourceLang, targetLang);
+        outputTextArea.value = translated;
+      } catch (err) {
+        outputTextArea.value = `Error: ${err.message}`;
+      }
+    }
+
+    // PERSISTENCE LOCALSTORAGE: SAVED PHRASES & HISTORY
+    function loadLocalStorage() {
+      try {
+        const savedData = localStorage.getItem('saved_phrases');
+        const historyData = localStorage.getItem('translation_history');
+        
+        if (savedData) savedPhrases = JSON.parse(savedData);
+        if (historyData) translationHistory = JSON.parse(historyData);
+      } catch (err) {
+        console.error("Local storage reading failed", err);
+      }
+      
+      renderSavedList();
+      renderHistoryList();
+    }
+
+    function saveToLocalStorage() {
+      try {
+        localStorage.setItem('saved_phrases', JSON.stringify(savedPhrases));
+        localStorage.setItem('translation_history', JSON.stringify(translationHistory));
+      } catch (err) {
+        console.error("LocalStorage write failed", err);
+      }
+    }
+
+    // star icon state helper
+    function updateStarStatus(isStarred) {
+      const starBtn = document.getElementById('starBtn');
+      if (!starBtn) return;
+      const icon = starBtn.querySelector('i');
+      if (isStarred) {
+        icon.className = 'fa-solid fa-star';
+        icon.style.color = 'gold';
+      } else {
+        icon.className = 'fa-regular fa-star';
+        icon.style.color = 'var(--text-muted)';
+      }
+    }
+
+    function checkStarredState(text, translated, srcLang, tgtLang) {
+      const exists = savedPhrases.some(p => p.text.toLowerCase() === text.toLowerCase() && p.tgtLang === tgtLang);
+      updateStarStatus(exists);
+    }
+
+    // Star/Unstar translation trigger
+    function toggleSaveTranslation() {
+      const srcText = document.getElementById('srcTextArea').value.trim();
+      const translated = document.getElementById('tgtTextArea').value.trim();
+      const srcLang = document.getElementById('srcLangSelect').value;
+      const tgtLang = document.getElementById('tgtLangSelect').value;
+
+      if (!srcText || !translated) {
+        showToast("No active translation to save!");
+        return;
+      }
+
+      const matchIndex = savedPhrases.findIndex(p => p.text.toLowerCase() === srcText.toLowerCase() && p.tgtLang === tgtLang);
+
+      if (matchIndex > -1) {
+        // Remove
+        savedPhrases.splice(matchIndex, 1);
+        updateStarStatus(false);
+        showToast("Removed from saved phrases.");
+      } else {
+        // Add
+        savedPhrases.unshift({
+          text: srcText,
+          translated: translated,
+          srcLang: srcLang,
+          tgtLang: tgtLang,
+          timestamp: new Date().toLocaleString()
+        });
+        updateStarStatus(true);
+        showToast("Saved to phrasebook!");
+      }
+
+      saveToLocalStorage();
+      renderSavedList();
+    }
+
+    function addHistoryItem(text, translated, srcLang, tgtLang) {
+      // Avoid duplicated entries back-to-back
+      if (translationHistory.length > 0 && translationHistory[0].text === text && translationHistory[0].tgtLang === tgtLang) {
+        return;
+      }
+
+      translationHistory.unshift({
+        text,
+        translated,
+        srcLang,
+        tgtLang,
+        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+      });
+
+      // Keep last 30
+      if (translationHistory.length > 30) {
+        translationHistory.pop();
+      }
+
+      saveToLocalStorage();
+      renderHistoryList();
+    }
+
+    // Rendering functions
+    function renderSavedList() {
+      const list = document.getElementById('savedList');
+      list.innerHTML = '';
+
+      if (savedPhrases.length === 0) {
+        list.innerHTML = '<div class="archive-empty">No bookmarked translations. Click the star icon to bookmark translations.</div>';
+        return;
+      }
+
+      savedPhrases.forEach((item, idx) => {
+        const div = document.createElement('div');
+        div.className = 'archive-item';
+        div.innerHTML = `
+          <div class="archive-item-langs">${item.srcLang} <i class="fa-solid fa-arrow-right-long"></i> ${item.tgtLang}</div>
+          <div class="archive-item-text">${item.text}</div>
+          <div class="archive-item-translated">${item.translated}</div>
+          <div class="archive-item-actions">
+            <button class="archive-item-btn" title="Speak translation" onclick="speakText('${item.translated}', '${item.tgtLang}')">
+              <i class="fa-solid fa-volume-high"></i>
+            </button>
+            <button class="archive-item-btn" title="Restore to translator" onclick="restoreTranslation('${item.text}', '${item.translated}', '${item.srcLang}', '${item.tgtLang}')">
+              <i class="fa-solid fa-arrow-rotate-left"></i>
+            </button>
+            <button class="archive-item-btn delete" title="Delete bookmark" onclick="deleteSavedItem(${idx})">
+              <i class="fa-solid fa-trash-can"></i>
+            </button>
+          </div>
+        `;
+        list.appendChild(div);
+      });
+    }
+
+    function renderHistoryList() {
+      const list = document.getElementById('historyList');
+      list.innerHTML = '';
+
+      if (translationHistory.length === 0) {
+        list.innerHTML = '<div class="archive-empty">Translation logs are currently empty.</div>';
+        return;
+      }
+
+      translationHistory.forEach((item, idx) => {
+        const div = document.createElement('div');
+        div.className = 'archive-item';
+        div.innerHTML = `
+          <div class="archive-item-langs" style="display:flex; justify-content:space-between;">
+            <span>${item.srcLang} &rarr; ${item.tgtLang}</span>
+            <span style="opacity: 0.6; font-size: 0.7rem;">${item.timestamp}</span>
+          </div>
+          <div class="archive-item-text">${item.text}</div>
+          <div class="archive-item-translated">${item.translated}</div>
+          <div class="archive-item-actions">
+            <button class="archive-item-btn" title="Speak translation" onclick="speakText('${item.translated}', '${item.tgtLang}')">
+              <i class="fa-solid fa-volume-high"></i>
+            </button>
+            <button class="archive-item-btn" title="Restore to translator" onclick="restoreTranslation('${item.text}', '${item.translated}', '${item.srcLang}', '${item.tgtLang}')">
+              <i class="fa-solid fa-arrow-rotate-left"></i>
+            </button>
+            <button class="archive-item-btn delete" title="Remove history entry" onclick="deleteHistoryItem(${idx})">
+              <i class="fa-solid fa-xmark"></i>
+            </button>
+          </div>
+        `;
+        list.appendChild(div);
+      });
+    }
+
+    // Archive action handlers
+    function deleteSavedItem(idx) {
+      savedPhrases.splice(idx, 1);
+      saveToLocalStorage();
+      renderSavedList();
+      showToast("Phrase removed.");
+      // update text page star in case they are looking at it
+      const srcText = document.getElementById('srcTextArea').value.trim();
+      const tgtLang = document.getElementById('tgtLangSelect').value;
+      checkStarredState(srcText, '', '', tgtLang);
+    }
+
+    function deleteHistoryItem(idx) {
+      translationHistory.splice(idx, 1);
+      saveToLocalStorage();
+      renderHistoryList();
+    }
+
+    // Clear options
+    function clearAllSaved() {
+      if (confirm("Are you sure you want to clear your saved phrases?")) {
+        savedPhrases = [];
+        saveToLocalStorage();
+        renderSavedList();
+        updateStarStatus(false);
+        showToast("Saved phrases cleared.");
+      }
+    }
+
+    function clearHistory() {
+      if (confirm("Are you sure you want to clear your translation history?")) {
+        translationHistory = [];
+        saveToLocalStorage();
+        renderHistoryList();
+        showToast("History log cleared.");
+      }
+    }
+
+    function restoreTranslation(text, translated, srcLang, tgtLang) {
+      document.getElementById('srcTextArea').value = text;
+      document.getElementById('tgtTextArea').value = translated;
+      document.getElementById('srcLangSelect').value = srcLang;
+      document.getElementById('tgtLangSelect').value = tgtLang;
+      
+      document.getElementById('srcCharCount').textContent = `${text.length} / 5000`;
+      document.getElementById('tgtCharCount').textContent = translated.length;
+      
+      updateStarStatus(true);
+      switchTab({ currentTarget: document.querySelectorAll('.tab-btn')[0] }, 'textPanel');
+      showToast("Translation restored to main tab.");
+    }
+
+    // Clipboard and Sharing utilities
+    function copyToClipboard(elementId) {
+      const textarea = document.getElementById(elementId);
+      if (!textarea || !textarea.value) {
+        showToast("Nothing to copy!");
+        return;
+      }
+      
+      textarea.select();
+      textarea.setSelectionRange(0, 99999); // Mobile
+      navigator.clipboard.writeText(textarea.value);
+      showToast("Copied to clipboard!");
+    }
+
+    function shareTranslation() {
+      const text = document.getElementById('tgtTextArea').value;
+      if (!text) {
+        showToast("Nothing to share!");
+        return;
+      }
+
+      if (navigator.share) {
+        navigator.share({
+          title: 'LumixTranslate Translation',
+          text: text,
+          url: window.location.href
+        })
+        .then(() => showToast("Shared successfully!"))
+        .catch((e) => console.log('Sharing canceled', e));
+      } else {
+        // Fallback copy link
+        showToast("Sharing API not supported. Copied translation instead!");
+        copyToClipboard('tgtTextArea');
+      }
+    }
+
+    // ==========================================
+    // AI CHATBOT / LANGUAGE TUTOR SYSTEM
+    // ==========================================
+    let chatCurrentTopic = 'basics';
+    let chatCurrentTurnIndex = 0;
+    let chatTargetLanguage = 'te';
+    let chatVoiceRecognition = null;
+    let isChatVoiceListening = false;
+
+    const CHAT_TOPICS = {
+      basics: {
+        title: "Greetings & Basics",
+        botIntro: "Hello! Nice to meet you. I am your AI language coach. Let's practice conversing in your target language! What is your name, and where are you from?",
+        turns: [
+          {
+            botResponse: "Nice to meet you! How are you doing today?",
+            suggestions: [
+              "I am doing great, thank you! How about you?",
+              "I am a bit tired today, but ready to learn."
+            ],
+            advice: "Describe your day or ask the tutor how they are doing."
+          },
+          {
+            botResponse: "Excellent! Learning a new language is a beautiful journey. What hobbies or activities do you like doing in your free time?",
+            suggestions: [
+              "I love reading books, playing games, and learning new things.",
+              "I enjoy cooking food and talking to friends."
+            ],
+            advice: "Use words like like, love, enjoy to share your hobbies."
+          },
+          {
+            botResponse: "Those are wonderful hobbies! Hobbies make life exciting. Do you prefer working on your computer or using your phone for hobbies?",
+            suggestions: [
+              "I prefer using my computer because it has a big screen.",
+              "I use my phone mostly for social apps."
+            ],
+            advice: "Talk about your digital devices and explain why you prefer one over the other."
+          },
+          {
+            botResponse: "Interesting! Technology has made learning and chatting so much easier. Thank you for this great practice session! Let's continue chatting or you can choose another topic anytime.",
+            suggestions: [
+              "Thank you, teacher! That was fun.",
+              "I want to practice more, let's talk about food."
+            ],
+            advice: "Wrap up the basic introduction. You can switch topics using the menu above!"
+          }
+        ]
+      },
+      food: {
+        title: "Ordering Food",
+        botIntro: "Welcome to Lumix Café! 🍔 I'll be your server today. Are you ready to order, or would you like to see the menu?",
+        turns: [
+          {
+            botResponse: "Great! We have delicious pasta, fresh salads, and hot coffee today. What would you like to have?",
+            suggestions: [
+              "I would like to order a pasta and a cup of coffee, please.",
+              "Can you recommend the most popular dish?"
+            ],
+            advice: "Order a main dish and a drink, or ask the waiter for recommendations."
+          },
+          {
+            botResponse: "Excellent choice! Our chef makes amazing pasta. Would you like a glass of fresh water with that, or any dessert?",
+            suggestions: [
+              "Just some water, thank you.",
+              "Yes, please bring me a delicious chocolate dessert."
+            ],
+            advice: "Request water or opt for a sweet dessert to finish your order."
+          },
+          {
+            botResponse: "Perfect, I have noted that down! Your meal will be ready in ten minutes. Enjoy your food!",
+            suggestions: [
+              "Thank you very much! Can I get the bill later?",
+              "Thank you, I am looking forward to it."
+            ],
+            advice: "Thank the server and ask about the bill or express excitement."
+          }
+        ]
+      },
+      travel: {
+        title: "Travel & Directions",
+        botIntro: "Excuse me, traveler! 🗺️ You look a bit lost. I am a local guide. Can I help you find directions, or are you looking for a hotel?",
+        turns: [
+          {
+            botResponse: "Ah! I know this area very well. Are you going back to your home, or are you heading to the popular tourist spots nearby?",
+            suggestions: [
+              "I am looking for the way to go to my home.",
+              "Please show me the direction to the city library."
+            ],
+            advice: "Explain your destination clearly to the guide."
+          },
+          {
+            botResponse: "No problem at all! Walk straight down this road, then turn left at the next street. It will be right there. Do you need a taxi?",
+            suggestions: [
+              "Thank you! I will walk, it sounds close.",
+              "Yes, please help me call a taxi."
+            ],
+            advice: "Decide whether to walk or ask the guide to arrange transportation."
+          },
+          {
+            botResponse: "You're very welcome! Have a safe and happy journey. Goodbye!",
+            suggestions: [
+              "Goodbye! Thank you for your kindness.",
+              "Have a nice day! Bye."
+            ],
+            advice: "Conclude the travel conversation politely."
+          }
+        ]
+      },
+      daily: {
+        title: "Daily Life Chat",
+        botIntro: "Hey there! How is your day going? ☀️ Did you do anything productive this morning, or are you relaxing today?",
+        turns: [
+          {
+            botResponse: "Sounds good! A balanced day is key. Did you meet any friends today or are you planning to see someone later?",
+            suggestions: [
+              "I met my best friend this morning for coffee.",
+              "No, I am staying at home with my family today."
+            ],
+            advice: "Mention social plans or state if you are spending time at home."
+          },
+          {
+            botResponse: "Spending quality time is always refreshing. What is your favorite thing to do when you want to relax after a busy day?",
+            suggestions: [
+              "I like to listen to happy music or read a book.",
+              "I usually just sleep or watch a movie."
+            ],
+            advice: "Share your relaxation routine (listening to music, books, sleep)."
+          },
+          {
+            botResponse: "That sounds like the perfect way to unwind! We should always make time for ourselves. Have a peaceful evening!",
+            suggestions: [
+              "Thank you! You have a great evening too.",
+              "Thanks! Speak to you next time."
+            ],
+            advice: "Say a warm goodbye and wish them a good evening."
+          }
+        ]
+      }
+    };
+
+    function changeChatTargetLang() {
+      chatTargetLanguage = document.getElementById('chatTargetLang').value;
+      // Reload chat interface for new target language
+      changeChatTopic();
+    }
+
+    async function changeChatTopic() {
+      chatCurrentTopic = document.getElementById('chatTopicSelect').value;
+      chatCurrentTurnIndex = 0;
+      
+      const history = document.getElementById('chatHistory');
+      if (history) history.innerHTML = ''; // clear history
+
+      const topicData = CHAT_TOPICS[chatCurrentTopic];
+      const botTextEn = topicData.botIntro;
+
+      // Show loader
+      showBotTypingIndicator(true);
+
+      try {
+        const botTextTarget = await translateApiCall(botTextEn, 'en', chatTargetLanguage);
+        showBotTypingIndicator(false);
+        addChatBubble(botTextEn, botTextTarget, 'bot');
+        loadSuggestedReplies();
+      } catch (err) {
+        showBotTypingIndicator(false);
+        addChatBubble(botTextEn, "[Translation Error] " + botTextEn, 'bot');
+      }
+    }
+
+    function showBotTypingIndicator(show) {
+      const history = document.getElementById('chatHistory');
+      if (!history) return;
+      let indicator = document.getElementById('chatTypingIndicator');
+      
+      if (show) {
+        if (!indicator) {
+          indicator = document.createElement('div');
+          indicator.id = 'chatTypingIndicator';
+          indicator.className = 'convo-bubble received';
+          indicator.style.fontStyle = 'italic';
+          indicator.style.alignSelf = 'flex-start';
+          indicator.innerHTML = `<i class="fa-solid fa-ellipsis fa-bounce"></i> AI Coach is typing...`;
+          history.appendChild(indicator);
+        }
+        history.scrollTop = history.scrollHeight;
+      } else {
+        if (indicator) {
+          indicator.remove();
+        }
+      }
+    }
+
+    function addChatBubble(enText, targetText, sender) {
+      const history = document.getElementById('chatHistory');
+      if (!history) return;
+      const bubble = document.createElement('div');
+      
+      bubble.className = `convo-bubble ${sender === 'user' ? 'sent' : 'received'}`;
+      if (sender === 'user') {
+        bubble.style.alignSelf = 'flex-end';
+        bubble.style.background = 'rgba(6, 182, 212, 0.15)';
+        bubble.style.border = '1px solid rgba(6, 182, 212, 0.25)';
+        bubble.style.color = '#e0f2fe';
+        
+        // If user text, show both if they differ significantly
+        if (enText !== targetText) {
+          bubble.innerHTML = `<div><strong>${targetText}</strong></div><div style="font-size: 0.8rem; opacity: 0.7; border-top: 1px dashed rgba(255,255,255,0.06); padding-top: 4px; margin-top: 4px;">English: ${enText}</div>`;
+        } else {
+          bubble.textContent = targetText;
+        }
+      } else {
+        bubble.style.alignSelf = 'flex-start';
+        bubble.style.background = 'rgba(236, 72, 153, 0.15)';
+        bubble.style.border = '1px solid rgba(236, 72, 153, 0.25)';
+        bubble.style.color = '#fce7f3';
+        
+        bubble.innerHTML = `
+          <div style="display:flex; justify-content:space-between; gap:10px; align-items:flex-start;">
+            <div>
+              <strong>${targetText}</strong>
+              <div style="font-size: 0.8rem; opacity: 0.7; border-top: 1px dashed rgba(255,255,255,0.06); padding-top: 4px; margin-top: 4px;">English: ${enText}</div>
+            </div>
+            <button class="archive-item-btn" style="color: var(--accent-tertiary); padding: 0 4px; font-size: 0.95rem; margin-top: 2px;" title="Listen to response" onclick="speakText(\`${targetText.replace(/"/g, '\\"')}\`, '${chatTargetLanguage}')">
+              <i class="fa-solid fa-volume-high"></i>
+            </button>
+          </div>
+        `;
+      }
+      
+      history.appendChild(bubble);
+      history.scrollTop = history.scrollHeight;
+    }
+
+    async function loadSuggestedReplies() {
+      const list = document.getElementById('suggestedRepliesList');
+      const adviceLabel = document.getElementById('tutorAdviceText');
+      if (!list) return;
+      list.innerHTML = '';
+
+      const topicData = CHAT_TOPICS[chatCurrentTopic];
+      
+      // If we finished the turns, show standard wrap-up advice
+      if (chatCurrentTurnIndex >= topicData.turns.length) {
+        if (adviceLabel) adviceLabel.textContent = "You've completed this conversation topic! You can choose another topic or restart this one anytime.";
+        list.innerHTML = '<div style="font-size:0.85rem; color:var(--text-muted); font-style:italic;">Topic completed. Select another practice topic above!</div>';
+        return;
+      }
+
+      const turn = topicData.turns[chatCurrentTurnIndex];
+      if (adviceLabel) adviceLabel.textContent = turn.advice;
+
+      for (let i = 0; i < turn.suggestions.length; i++) {
+        const suggEn = turn.suggestions[i];
+        
+        // Show loaders for suggestions
+        const itemBtn = document.createElement('button');
+        itemBtn.className = 'ocr-btn';
+        itemBtn.style.padding = '8px 12px';
+        itemBtn.style.fontSize = '0.85rem';
+        itemBtn.style.textAlign = 'left';
+        itemBtn.style.width = '100%';
+        itemBtn.style.display = 'block';
+        itemBtn.innerHTML = `<i class="fa-solid fa-circle-notch fa-spin"></i> Translating reply...`;
+        list.appendChild(itemBtn);
+
+        try {
+          const suggTarget = await translateApiCall(suggEn, 'en', chatTargetLanguage);
+          itemBtn.innerHTML = `<strong style="color: var(--accent-secondary);">${suggTarget}</strong><br><span style="font-size:0.75rem; opacity:0.7;">English: ${suggEn}</span>`;
+          itemBtn.onclick = () => {
+            const input = document.getElementById('chatInput');
+            if (input) {
+              input.value = suggTarget;
+              sendChatMessage();
+            }
+          };
+        } catch (e) {
+          itemBtn.textContent = suggEn;
+          itemBtn.onclick = () => {
+            const input = document.getElementById('chatInput');
+            if (input) {
+              input.value = suggEn;
+              sendChatMessage();
+            }
+          };
+        }
+      }
+    }
+
+    function handleChatKey(event) {
+      if (event.key === 'Enter') {
+        sendChatMessage();
+      }
+    }
+
+    async function sendChatMessage() {
+      const input = document.getElementById('chatInput');
+      if (!input) return;
+      const userText = input.value.trim();
+      if (!userText) return;
+
+      input.value = '';
+
+      // Stop voice dictation if active
+      if (isChatVoiceListening) {
+        toggleChatVoiceInput();
+      }
+
+      // Add user message to UI
+      showBotTypingIndicator(true);
+
+      let userTextEn = '';
+      try {
+        userTextEn = await translateApiCall(userText, chatTargetLanguage, 'en');
+      } catch (e) {
+        userTextEn = userText; // fallback
+      }
+
+      addChatBubble(userTextEn, userText, 'user');
+
+      // Progress turn index
+      const topicData = CHAT_TOPICS[chatCurrentTopic];
+      
+      setTimeout(async () => {
+        if (chatCurrentTurnIndex < topicData.turns.length) {
+          const turn = topicData.turns[chatCurrentTurnIndex];
+          chatCurrentTurnIndex++;
+
+          const botResponseEn = turn.botResponse;
+          try {
+            const botResponseTarget = await translateApiCall(botResponseEn, 'en', chatTargetLanguage);
+            showBotTypingIndicator(false);
+            addChatBubble(botResponseEn, botResponseTarget, 'bot');
+            loadSuggestedReplies();
+            
+            // Auto read bot response aloud
+            speakText(botResponseTarget, chatTargetLanguage);
+          } catch (e) {
+            showBotTypingIndicator(false);
+            addChatBubble(botResponseEn, botResponseEn, 'bot');
+            loadSuggestedReplies();
+          }
+        } else {
+          showBotTypingIndicator(false);
+          const defaultEn = "That's great! Feel free to choose another topic from the menu or continue writing custom sentences to practice.";
+          const defaultTarget = await translateApiCall(defaultEn, 'en', chatTargetLanguage);
+          addChatBubble(defaultEn, defaultTarget, 'bot');
+          
+          speakText(defaultTarget, chatTargetLanguage);
+        }
+      }, 1000);
+    }
+
+    // Voice recognition for chatbot input
+    function toggleChatVoiceInput() {
+      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+      if (!SpeechRecognition) {
+        showToast("Speech Recognition not supported in this browser. Try Chrome/Edge.");
+        return;
+      }
+
+      const micBtn = document.getElementById('chatMicBtn');
+      if (!micBtn) return;
+
+      if (isChatVoiceListening) {
+        if (chatVoiceRecognition) {
+          try { chatVoiceRecognition.stop(); } catch(e){}
+        }
+        chatVoiceRecognition = null;
+        isChatVoiceListening = false;
+        micBtn.style.background = 'rgba(255,255,255,0.05)';
+        micBtn.style.color = 'var(--text-muted)';
+        micBtn.classList.remove('recording');
+        showWaveformHUD(false);
+        stopProceduralWaveform();
+        return;
+      }
+
+      isChatVoiceListening = true;
+      micBtn.style.background = 'rgba(6, 182, 212, 0.15)';
+      micBtn.style.color = 'var(--accent-secondary)';
+      micBtn.classList.add('recording');
+
+      chatVoiceRecognition = new SpeechRecognition();
+      chatVoiceRecognition.interimResults = false;
+      chatVoiceRecognition.maxAlternatives = 1;
+      chatVoiceRecognition.lang = getVoiceBcp47Lang(chatTargetLanguage);
+
+      chatVoiceRecognition.onstart = () => {
+        showWaveformHUD(true, "Speak into chat...");
+        startProceduralWaveform();
+      };
+
+      chatVoiceRecognition.onerror = (e) => {
+        console.error("Chat speech recognition error", e);
+        showToast("Failed to recognize voice.");
+        toggleChatVoiceInput();
+      };
+
+      chatVoiceRecognition.onend = () => {
+        if (isChatVoiceListening) {
+          toggleChatVoiceInput();
+        }
+      };
+
+      chatVoiceRecognition.onresult = (event) => {
+        const transcript = event.results[0][0].transcript;
+        const input = document.getElementById('chatInput');
+        if (input) {
+          input.value = (input.value + " " + transcript).trim();
+          showToast("Voice transcribed!");
+        }
+      };
+
+      try {
+        chatVoiceRecognition.start();
+      } catch (err) {
+        console.error("Chat Speech start error", err);
+        toggleChatVoiceInput();
+      }
+    }
+
+    // Trigger initial topic load on load
+    window.addEventListener('DOMContentLoaded', () => {
+      setTimeout(() => {
+        changeChatTopic();
+      }, 500);
+    });
+
+    // Alert toast display helper
+    function showToast(msg) {
+      const toast = document.getElementById('toastNotification');
+      const label = document.getElementById('toastMsg');
+      
+      label.textContent = msg;
+      toast.classList.add('active');
+
+      setTimeout(() => {
+        toast.classList.remove('active');
+      }, 3000);
+    }
+  </script>
+</body>
+</html>
