@@ -1,16 +1,17 @@
 # 🌐 LumixTranslate - Premium AI Multilingual Translator
 
-![LumixTranslate](https://img.shields.io/badge/Status-Active-brightgreen) ![Python](https://img.shields.io/badge/Python-3.x-blue) ![Flask](https://img.shields.io/badge/Framework-Flask-black)
+[![Open Live Website](https://img.shields.io/badge/🚀_Open_Live_Website-Click_Here-6366f1?style=for-the-badge&logo=github)](https://mallikarjunagummalla3.github.io/Lumix-Translate/)
+![Status](https://img.shields.io/badge/Status-Active-brightgreen) ![Python](https://img.shields.io/badge/Python-3.x-blue) ![Flask](https://img.shields.io/badge/Framework-Flask-black)
 
 A modern, fast, and feature-rich AI-powered multilingual web translator and text-to-speech suite built with Python (Flask), HTML5, and JavaScript.
 
 ---
 
-## 🔗 Live Web Link & Repository
+## 🔗 Live Web Link & Access
 
-- 🌐 **Live Website (GitHub Pages)**: `https://mallikarjunagummalla3.github.io/Lumix-Translate/` *(100% Free, Permanent)*
+- 🌐 **Permanent Live Website**: **[https://mallikarjunagummalla3.github.io/Lumix-Translate/](https://mallikarjunagummalla3.github.io/Lumix-Translate/)** *(Works anytime from any browser/device!)*
 - 💻 **Local Server**: `http://localhost:5000` *(Requires running `python app.py` on your machine)*
-- 🐙 **GitHub Code**: [https://github.com/Mallikarjunagummalla3/Lumix-Translate](https://github.com/Mallikarjunagummalla3/Lumix-Translate)
+- 🐙 **GitHub Repository**: [https://github.com/Mallikarjunagummalla3/Lumix-Translate](https://github.com/Mallikarjunagummalla3/Lumix-Translate)
 
 ---
 
