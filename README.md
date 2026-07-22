@@ -6,15 +6,11 @@ A modern, fast, and feature-rich AI-powered multilingual web translator and text
 
 ---
 
-## 🔗 Project Access & Live Links
+## 🔗 Live Web Link & Repository
 
-> ⚠️ **Note on `localhost:5000`**: `http://localhost:5000` works **only on your local computer** when `app.py` is running. If you click it on GitHub without running `app.py` on your machine, it will show *"can't reach this page" / Connection Refused*.
-
-- 💻 **Local Development**: `http://localhost:5000` (Requires `python app.py` running)
-- 🐙 **GitHub Repository**: [https://github.com/Mallikarjunagummalla3/Lumix-Translate](https://github.com/Mallikarjunagummalla3/Lumix-Translate)
-- 🚀 **Free Live Hosting Options**: 
-  - Deploy to **[Render.com](https://render.com)** for a permanent public link like `https://lumix-translate.onrender.com`
-  - Deploy to **[Vercel](https://vercel.com)** or **[PythonAnywhere](https://www.pythonanywhere.com/)**
+- 🌐 **Live Website (GitHub Pages)**: `https://mallikarjunagummalla3.github.io/Lumix-Translate/` *(100% Free, Permanent)*
+- 💻 **Local Server**: `http://localhost:5000` *(Requires running `python app.py` on your machine)*
+- 🐙 **GitHub Code**: [https://github.com/Mallikarjunagummalla3/Lumix-Translate](https://github.com/Mallikarjunagummalla3/Lumix-Translate)
 
 ---
 
